@@ -49,9 +49,15 @@ Rough order of work:
 1. ~~Blink / serial "hello" to confirm the toolchain and board~~ (replaced by the display test)
 2. Display driver: init, full refresh, partial refresh (written, needs hardware test)
 3. BLE keyboard to serial (needs the keyboard on hand)
-4. Text buffer, wrapping and drawing
+4. Text buffer, wrapping and drawing (written: `text_buffer`, `text_render`, bitmap
+   font from `tools/gen_font.py`; bold/italic and the status panel not ported yet)
 5. Save/load, deep sleep, battery gauge
 6. Optional: Wi-Fi sync
+
+## Tests
+
+`test/run_tests.sh` checks on a PC that the text buffer wraps lines exactly like the
+Pi's typing logic (needs g++ and python3). It does not need the ESP32.
 
 ## Not planned (for now)
 

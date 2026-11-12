@@ -1,124 +1,139 @@
-# zerowriter
+# ZeroWriter
 
-important update: raspberry pi OS has changed GPIO support, so it is important you use archived versions of the OS: https://github.com/zerowriter/zerowriter1/issues/26#issuecomment-2466903737
+A distraction-free e-ink typewriter. A Raspberry Pi Zero 2 W drives a 5.76" e-paper
+display and reads a regular USB (or Bluetooth) keyboard. There is no desktop, no
+browser and no notifications: you turn it on and type.
 
-----------
+The whole program is a small Python application in `src/`.
 
-Zerowriter Ink (all-in-one device) is now available: https://www.crowdsupply.com/zerowriter/zerowriter-ink
+## Hardware
 
-Interest form / survey for potential future products: https://forms.gle/8dZwQsYdUa9X49WCA 
-----------
+- Raspberry Pi Zero 2 W (an original Zero is too slow) and a microSD card
+- Good Display **GDEH0576T81** 5.76" e-paper panel (920x680, SSD2677 controller)
+- Good Display **DESPI-C02** adapter board (DIP switch P3 set to **2.2**)
+- Any USB keyboard, plus a USB OTG adapter or cable for the Pi's data port
+- Power: a USB power supply or any power bank
 
-Yo! Check the back of your 4.2" waveshare e-Paper. If it says Rev2.2 or has a V2 sticker, you'll want to use this branch: 
+The GDEH0576T81 is the only panel this code supports. Pin connections and board
+settings are in [docs/WIRING.md](docs/WIRING.md). A parts list is in
+[docs/componentslist](docs/componentslist).
 
-https://github.com/zerowriter/zerowriter1/tree/waveshare_2.2
-The waveshare_2.2 branch is built specifically for the v2 displays. The main branches won't function properly on these displays. Going forward, this will likely be the default branch for the project.
+## Setup
 
-If it says Rev2.1, you'll want to use these branches:
+The full walk-through is in [docs/how-to-setup-your-pi](docs/how-to-setup-your-pi).
+In short:
 
-https://github.com/zerowriter/zerowriter1/tree/main_full
-The main_full branch has a bunch of updates and includes a lot of new features.
+1. Flash Raspberry Pi OS Lite (Bookworm) with the Raspberry Pi Imager. Set wifi, a
+   hostname and a user, and enable SSH.
+2. Enable SPI (`dtparam=spi=on`). [docs/sampleconfig](docs/sampleconfig) is a
+   working `config.txt`, including optional overclock settings.
+3. Install the dependencies:
 
-This main branch will be discontinued and not further developed.
-I am leaving it as-is because some people may want the simple typewriter with no extra software features. And it is a small codebase.
+   ```bash
+   sudo apt update
+   sudo apt install python3-pip python3-spidev python3-rpi.gpio python3-pil python3-numpy git
+   sudo pip3 install keyboard --break-system-packages
+   ```
 
-----------
+4. Clone this repo and run it from `src/`. It needs root to read the keyboard and
+   drive the display:
 
-An easy, DIY eink typewriter running on a raspberry pi zero. Perfect for beginners.
+   ```bash
+   cd zerowriter/src
+   sudo python main.py
+   ```
 
-This project is open-source. Do whatever you want with it. Please note the display drivers and waveshare code belongs to them. But buy their displays, they rock.
+5. To start on boot, add this line with `crontab -e`:
 
-Credit to: https://penkesu.computer/ for the original project that inspired this.
+   ```
+   @reboot cd zerowriter/src/ && sudo python main.py &
+   ```
 
-Components list: https://github.com/zerowriter/zerowriter1/blob/main/docs/componentslist
+## Using it
 
-pi zero setup steps: https://github.com/zerowriter/zerowriter1/blob/main/docs/how-to-setup-your-pi
+Type as you would on any keyboard. The text area shows the last 14 lines, with the
+line you are typing at the bottom. Under it, a status panel shows a page progress
+bar, session time, word count, character count and the current file name.
 
-----------
- 
-The src/waveshare_epd directory is a modified waveshare drivers. All waveshare code belongs to them. Great company, buy their gadgets!
+| Keys | Action |
+|------|--------|
+| Ctrl+S | Save. The first time it asks for a file name (Enter confirms, Esc cancels). Pressing Enter at the end of a line also autosaves a named file. |
+| Ctrl+R | Rename the file / save as |
+| Ctrl+O | Open a saved file. Up/Down chooses (Shift+Up/Down moves a page), Enter opens, Del then `y` deletes, Esc cancels. Each file shows its date and word count. |
+| Ctrl+N | Save the current file and start a new one |
+| Ctrl+E | Back up saved files to the cloud (see below) |
+| Ctrl+B / Ctrl+I / Ctrl+U | Toggle bold / italic / underline for what you type next |
+| Arrow keys | Scroll back through earlier pages |
+| Tab | Insert two spaces |
+| Ctrl+Esc | Power down the Pi |
 
-Use this modified code at your own risk. The modified driver may cause damage to your display. Don't blame me.
+Your work in progress is cached in `src/data/cache.txt` and restored the next time
+the program starts, so nothing is lost if the power is pulled.
 
-I have included .STL files (hardware/) for the enclosure I have been using. Feel free to use them however you want.
+## Files
 
-----------
+Documents are saved in `src/data/documents/` as Markdown (`.md`). Bold, italic and
+underline are stored as `**bold**`, `*italic*` and `<u>underline</u>`, so any other
+editor can open them. Style markers are not counted in the word and character totals.
 
-How it works:
+Only one font (Courier Prime) is installed, so bold, italic and underline are drawn
+synthetically.
 
-The application is in src/main.py, built on top of the example code from waveshare.
+To copy files to another computer, use `scp`/SFTP over SSH, or install Samba on the Pi.
 
-The application itself can be modified to do whatever you want (or just leave it be). The basics:
+## Cloud backup
 
-epd.init() clears the screen using slow look up tables -- this prevents artifacting
+Ctrl+E uploads new and changed documents with [rclone](https://rclone.org), so it
+works with Google Drive, Dropbox, OneDrive, Nextcloud and more. It is a one-way copy
+that never deletes anything. It needs one-time setup over SSH, described in
+[docs/CLOUD_BACKUP.md](docs/CLOUD_BACKUP.md).
 
-epd.init_Partial() runs a faster update using modified LUT. (Ben Krasnow: https://hackaday.com/2017/10/31/ben-krasnow-hacks-e-paper-for-fastest-refresh-rate/) -- important to note this only works with the 4.2" v1 waveshare display.
-
-Use a Pi Zero 2W. Don't use an original Zero. The extra power is very useful.
-
-----------
-
-Setup / Getting Started:
-
-https://github.com/zerowriter/zerowriter1/blob/main/docs/how-to-setup-your-pi
-
-- requires pi zero 2w running bookworm, light install recomend (headless/no GUI)
-- set up ssh and configure your pi zero remotely via terminal or powershell
-- Drop in the src folder provided in this repo and run main.py from ssh
-- Set up crontab (from command line: crontab -e) to boot to main.py
-
-Hardware Features:
-- 40% keyboard and an eink display
-- tons of storage
-- bring-your-own-battery-pack: 10,000mah battery will yield around 25-30 hours of usage, a lot more if you cut networking
-- or just plug it into something
-- portable! stylish! cool! modified from the https://penkesu.computer/ penkesu computer
-
-Program Features:
-- light weight python typewriter
-- works with any USB keyboard
-- KEYMAPS file to edit key maps if you don't want to program your keyboard's firmware
-- files save in the /data directory where the program resides, access via SMB
-- autosaves the cache every time return is pressed
-- CTRL S saves the cache to a txt file
-- CTRL N starts a new file
-- CTRL ESC turns unit off.
-- (NEW, likely buggy) The arrow keys can be used to navigate through and review previous writing
-- You could easily add an output to google drive or etc
-
-===
-
-Have fun! Happy writing...
-
-===
-
-Steps to use a Bluetooth Keyboard
+## Bluetooth keyboards
 
 1. Run `sudo bluetoothctl`
-2. Run `agent on`
-3. Run `default-agent`
-4. Run `scan on`
-5. Wait until you see your device listed (be sure your keyboard is in pairing mode)
-6. Run `scan off`
-7. Run `devices` to list known Bluetooth devices
-8. Run `pair AA:BB:CC:DD:EE:FF` where `AA:BB:CC:DD:EE:FF` is the MAC address of your bluetooth keyboard
-9. You may need to reboot your raspberry pi before python is able to register your bluetooth keyboard.
+2. Run `agent on`, then `default-agent`
+3. Run `scan on` and put the keyboard in pairing mode
+4. When it appears, run `scan off`, then `pair AA:BB:CC:DD:EE:FF` with its address
+5. Reboot the Pi if the keyboard is not picked up
 
-https://www.youtube.com/watch?v=UEmSsscijKE has a video walkthrough of the above steps as well.
+## Keyboard layout
 
+`src/keymaps.py` maps unshifted keys to their shifted characters. Edit it if your
+keyboard produces the wrong symbols.
 
-----------
+## Tuning the display
 
-Files and shortcuts (GDEH0576T81 version):
+E-paper refreshes slowly, so typing only redraws the bottom strip of the screen and
+occasionally does a full refresh to clear ghosting. These environment variables
+adjust that when starting `main.py`:
 
-Below the text is a panel with a page progress bar, a divider, then session time (resets on a new or opened file), word count and character count, with the file name underneath.
-Files are stored as plain text in `src/data/documents/`.
+| Variable | Default | Meaning |
+|----------|---------|---------|
+| `ZW_STRIP_ROWS` | 240 | Rows redrawn while typing. Lower is faster but fainter, 0 redraws the whole screen. |
+| `ZW_STRIP_REPEAT` | 1 | Repeat each strip update for more contrast |
+| `ZW_FULL_REFRESH_AFTER` | 60 | Partial updates before a full-screen refresh |
+| `ZW_TIMING` | off | Set to `1` to print how long each update takes |
+| `ZW_CLOUD_REMOTE` | unset | rclone destination for backups, e.g. `gdrive:ZeroWriter` |
+| `ZW_CLOUD_TIMEOUT` | 120 | Seconds before a backup is given up on |
 
-- Ctrl+S: save (asks for a file name the first time; Enter confirms, Esc cancels). Enter also autosaves a named file.
-- Ctrl+R: rename / save as
-- Ctrl+O: open a saved file (Up/Down to choose (Shift+Up/Down a page at a time), each file shows its date and word count, Enter to open, Del to delete then y to confirm, Esc to cancel)
-- Ctrl+N: save the current file and start a new one
-- Ctrl+E: copy your saved files to a cloud service (Google Drive, Dropbox, OneDrive, ...) as a backup. Needs one-time setup, see docs/CLOUD_BACKUP.md. It only uploads new/changed files and never deletes anything in the cloud.
-- Ctrl+B / Ctrl+I / Ctrl+U: toggle bold / italic / underline for the text you type next (press again to turn off; an open style carries over to the next line). Saved files are Markdown (.md): **bold**, *italic*, and <u>underline</u>, so other editors can read them. Styles are not counted in word/character totals. Since only one font is installed, bold, italic and underline are drawn synthetically.
-- Arrow keys: scroll through pages
-- Ctrl+Esc: power down
+Panel orientation and the SPI clock live in `src/waveshare_epd/epd5in76.py`; see
+[docs/WIRING.md](docs/WIRING.md) for details.
+
+## Project layout
+
+```
+src/main.py             application: key handling, rendering, files
+src/textfmt.py          bold/italic/underline handling
+src/cloud.py            rclone backup
+src/keymaps.py          shift key map
+src/waveshare_epd/      display driver
+docs/                   wiring, setup, parts, cloud backup
+```
+
+## Credits and license
+
+Inspired by the [penkesu computer](https://penkesu.computer/). The display driver is
+adapted from Good Display's and Waveshare's example code, and remains theirs. The
+rest is released under the [license](LICENSE) in this repo.
+
+Use this at your own risk. A wrong wiring or driver setting can damage a display.

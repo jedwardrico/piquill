@@ -1,8 +1,7 @@
 # Wiring: Unexpected Maker FeatherS3 -> DESPI-C02 -> GDEH0576T81 (draft, untested)
 
-Pins are taken from the Unexpected Maker **FeatherS3[D]** pinout sheet. The
-FeatherS3 and FeatherS3[D] share the Feather header but a few things moved, so
-check this against the pinout for your exact board before soldering.
+Board: Unexpected Maker **FeatherS3[D]** (16 MB flash, 8 MB PSRAM). Pins are
+taken from its pinout sheet.
 
 The panel side is identical to the Pi build; see `../../docs/WIRING.md` for the
 DESPI-C02 header and board settings (P3 = 2.2, power from 3.3 V only, BUSY is
@@ -89,7 +88,5 @@ using it you cannot use it for flashing or serial output.
 
 ## Open questions
 
-- Which exact model do you have? The sheet I used is for the FeatherS3[D]
-  (16 MB flash, 8 MB PSRAM), but you described 8 MB flash and 2 MB PSRAM.
 - Does the panel work at 10 MHz SPI from this board? The SSD2677 datasheet leaves
   the maximum clock as TBD.

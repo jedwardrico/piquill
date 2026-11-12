@@ -1,7 +1,7 @@
 # PiQuill ESP32 (work in progress)
 
 A separate, standalone variant of PiQuill built around an Unexpected Maker
-**FeatherS3-family ESP32-S3 Feather** instead of a Raspberry Pi Zero 2 W. It lives in
+**FeatherS3[D] (ESP32-S3 Feather)** instead of a Raspberry Pi Zero 2 W. It lives in
 this folder only. Nothing in `src/`, `docs/` or the top-level README is used or
 changed by it, and the Pi version keeps working as before.
 
@@ -22,7 +22,7 @@ so this is a fresh firmware project that happens to drive the same panel. The go
 
 ## Hardware
 
-- Unexpected Maker FeatherS3 family board (pinout from the FeatherS3[D] sheet)
+- Unexpected Maker FeatherS3[D] (16 MB flash, 8 MB PSRAM)
 - Good Display GDEH0576T81 panel + DESPI-C02 adapter (DIP switch P3 = 2.2), same as the Pi build
 - USB keyboard (USB host) powered from a 5 V boost converter (Pololu U3V40F5 or similar)
 - LiPo cell on the Feather's JST connector

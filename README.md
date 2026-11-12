@@ -15,18 +15,15 @@ The whole program is a small Python application in `src/`.
 - Power: a USB power supply or any power bank
 
 The GDEH0576T81 is the only panel this code supports. Pin connections and board
-settings are in [docs/WIRING.md](docs/WIRING.md). A parts list is in
-[docs/componentslist](docs/componentslist).
+settings are in [docs/WIRING.md](docs/WIRING.md).
 
 ## Setup
 
-The full walk-through is in [docs/how-to-setup-your-pi](docs/how-to-setup-your-pi).
 In short:
 
 1. Flash Raspberry Pi OS Lite (Bookworm) with the Raspberry Pi Imager. Set wifi, a
    hostname and a user, and enable SSH.
-2. Enable SPI (`dtparam=spi=on`). [docs/sampleconfig](docs/sampleconfig) is a
-   working `config.txt`, including optional overclock settings.
+2. Enable SPI (`dtparam=spi=on` in `config.txt`, or via `sudo raspi-config`).
 3. Install the dependencies:
 
    ```bash
@@ -127,7 +124,7 @@ src/textfmt.py          bold/italic/underline handling
 src/cloud.py            rclone backup
 src/keymaps.py          shift key map
 src/waveshare_epd/      display driver
-docs/                   wiring, setup, parts, cloud backup
+docs/                   wiring, cloud backup
 ```
 
 ## Credits and license

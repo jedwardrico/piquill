@@ -1,4 +1,4 @@
-# Good Display GDEH0576T81 (5.76", 920x680, SSD2677) driver for the Zerowriter.
+# Good Display GDEH0576T81 (5.76", 920x680, SSD2677) driver for PiQuill.
 #
 # Ported from Good Display's Arduino demo for this panel (Display_EPD_W21.cpp)
 # and the SSD2677 datasheet. Same public API as the other drivers in this

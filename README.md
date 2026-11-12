@@ -1,10 +1,12 @@
-# ZeroWriter
+# PiQuill
 
 A distraction-free e-ink typewriter. A Raspberry Pi Zero 2 W drives a 5.76" e-paper
 display and reads a regular USB (or Bluetooth) keyboard. There is no desktop, no
 browser and no notifications: you turn it on and type.
 
 The whole program is a small Python application in `src/`.
+
+PiQuill began as a fork of [ZeroWriter](https://github.com/zerowriter/zerowriter1) and has since diverged from it.
 
 ## Hardware
 
@@ -36,14 +38,14 @@ In short:
    drive the display:
 
    ```bash
-   cd zerowriter/src
+   cd piquill/src
    sudo python main.py
    ```
 
 5. To start on boot, add this line with `crontab -e`:
 
    ```
-   @reboot cd zerowriter/src/ && sudo python main.py &
+   @reboot cd piquill/src/ && sudo python main.py &
    ```
 
 ## Using it
@@ -110,7 +112,7 @@ adjust that when starting `main.py`:
 | `ZW_STRIP_REPEAT` | 1 | Repeat each strip update for more contrast |
 | `ZW_FULL_REFRESH_AFTER` | 60 | Partial updates before a full-screen refresh |
 | `ZW_TIMING` | off | Set to `1` to print how long each update takes |
-| `ZW_CLOUD_REMOTE` | unset | rclone destination for backups, e.g. `gdrive:ZeroWriter` |
+| `ZW_CLOUD_REMOTE` | unset | rclone destination for backups, e.g. `gdrive:PiQuill` |
 | `ZW_CLOUD_TIMEOUT` | 120 | Seconds before a backup is given up on |
 
 Panel orientation and the SPI clock live in `src/waveshare_epd/epd5in76.py`; see

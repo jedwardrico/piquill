@@ -25,8 +25,8 @@ Nextcloud/WebDAV, S3 and many more, so you pick the service.
    `rclone authorize "drive"` command it shows on a computer that has a browser and paste
    the result back. See https://rclone.org/remote_setup/
 3. Check it works: `sudo rclone lsd gdrive:`
-4. Tell ZeroWriter where to send files, in the `src` folder (use any folder name):
-   `echo "gdrive:ZeroWriter" | sudo tee data/cloud_remote.txt`
+4. Tell PiQuill where to send files, in the `src` folder (use any folder name):
+   `echo "gdrive:PiQuill" | sudo tee data/cloud_remote.txt`
    (or set the `ZW_CLOUD_REMOTE` environment variable instead)
 5. Restart the typewriter, write something, Ctrl+S, then Ctrl+E.
 

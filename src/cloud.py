@@ -1,5 +1,5 @@
 #
-# Cloud backup for ZeroWriter documents, using rclone (https://rclone.org).
+# Cloud backup for PiQuill documents, using rclone (https://rclone.org).
 #
 # rclone talks to Google Drive, Dropbox, OneDrive, S3, WebDAV/Nextcloud, ...
 # so this module doesn't care which one you use. Set it up once over SSH
@@ -21,7 +21,7 @@ _lock = threading.Lock()
 
 
 def configured_remote(data_dir):
-    """The rclone destination, e.g. 'gdrive:ZeroWriter', or None if not set up.
+    """The rclone destination, e.g. 'gdrive:PiQuill', or None if not set up.
 
     Taken from $ZW_CLOUD_REMOTE, else the first line of data/cloud_remote.txt.
     """

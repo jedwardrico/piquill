@@ -39,10 +39,27 @@ Option: power the display from the board's second regulator (header pin
 shuts off automatically in deep sleep, so the panel draws nothing then. Untested:
 make sure the signal pins are not left driving an unpowered panel in sleep.
 
-## Keyboard power and data
+## Keyboard
 
-The Feather does not put 5 V on any pin when running from the battery, so a USB
-keyboard needs its own 5 V:
+**Plan: Bluetooth LE.** The Keychron B1 Pro should pair over BLE, which the
+S3 supports, so there is no keyboard wiring at all: no boost converter, no USB
+data wires, and the USB-C port stays free for flashing and serial.
+
+**Not yet confirmed.** Before relying on this, put the keyboard in Bluetooth
+pairing mode and check it shows up in a BLE scanner app (nRF Connect, LightBlue)
+with a "Human Interface Device" service. The S3 has no Bluetooth Classic, so a
+Classic-only keyboard would not work.
+
+Notes for the BLE route:
+
+- Pairing is done once and the bond is stored in flash.
+- Reconnecting after sleep takes a second or two, and a keypress cannot wake the
+  board from deep sleep, so add a wake button on a spare GPIO.
+
+### Fallback: USB keyboard (host mode)
+
+Only needed if BLE does not work out. The Feather puts no 5 V on any pin when
+running from the battery, so a USB keyboard needs its own 5 V:
 
 ```
 LiPo -> Feather BAT pin --> boost converter IN
@@ -56,6 +73,7 @@ Feather GPIO6  --------->   boost enable (SHDN)
 - The boost enable on GPIO6 lets you switch it off in deep sleep. Check the
   boost converter's minimum input against the LiPo cutoff.
 - Add a 100 uF or larger capacitor across VBUS and GND at the keyboard connector.
+- Use a USB Type-A female breakout for the keyboard connector.
 
 USB data lines: **GPIO19 (D-) and GPIO20 (D+) are not on the headers.** They
 only reach the USB-C connector. Options, from least to most work:

@@ -24,7 +24,8 @@ so this is a fresh firmware project that happens to drive the same panel. The go
 
 - Unexpected Maker FeatherS3[D] (16 MB flash, 8 MB PSRAM)
 - Good Display GDEH0576T81 panel + DESPI-C02 adapter (DIP switch P3 = 2.2), same as the Pi build
-- USB keyboard (USB host) powered from a 5 V boost converter (Pololu U3V40F5 or similar)
+- Keychron B1 Pro keyboard over Bluetooth LE (to be confirmed; USB host with a 5 V
+  boost converter is the fallback)
 - LiPo cell on the Feather's JST connector
 
 Wiring and open questions: [docs/WIRING.md](docs/WIRING.md).
@@ -39,17 +40,18 @@ Wiring and open questions: [docs/WIRING.md](docs/WIRING.md).
   Display's Arduino demo) to C++ on the ESP32 SPI peripheral.
 - Rendering: 920x680 1-bit framebuffer (~78 KB) in PSRAM or internal RAM, bitmap
   font instead of PIL/TrueType.
-- Input: USB host HID boot-keyboard reports, with a US layout first.
+- Input: BLE HID keyboard (NimBLE client, bonded once), with a US layout first.
+  USB host HID is the fallback.
 - Storage: LittleFS on the 8 MB flash.
 
 Rough order of work:
 
 1. ~~Blink / serial "hello" to confirm the toolchain and board~~ (replaced by the display test)
 2. Display driver: init, full refresh, partial refresh (written, needs hardware test)
-3. USB host keyboard to serial
+3. BLE keyboard to serial (needs the keyboard on hand)
 4. Text buffer, wrapping and drawing
 5. Save/load, deep sleep, battery gauge
-6. Optional: Wi-Fi sync, BLE keyboards
+6. Optional: Wi-Fi sync
 
 ## Not planned (for now)
 

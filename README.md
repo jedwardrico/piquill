@@ -1,26 +1,8 @@
-# zerowriter
+# PiQuill
 
-important update: raspberry pi OS has changed GPIO support, so it is important you use archived versions of the OS: https://github.com/zerowriter/zerowriter1/issues/26#issuecomment-2466903737
+An e-ink typewriter running on a Raspberry Pi Zero 2W: a 5.76" Good Display e-paper screen, any USB or Bluetooth keyboard, plain-text Markdown files and optional cloud backup.
 
-----------
-
-Zerowriter Ink (all-in-one device) is now available: https://www.crowdsupply.com/zerowriter/zerowriter-ink
-
-Interest form / survey for potential future products: https://forms.gle/8dZwQsYdUa9X49WCA 
-----------
-
-Yo! Check the back of your 4.2" waveshare e-Paper. If it says Rev2.2 or has a V2 sticker, you'll want to use this branch: 
-
-https://github.com/zerowriter/zerowriter1/tree/waveshare_2.2
-The waveshare_2.2 branch is built specifically for the v2 displays. The main branches won't function properly on these displays. Going forward, this will likely be the default branch for the project.
-
-If it says Rev2.1, you'll want to use these branches:
-
-https://github.com/zerowriter/zerowriter1/tree/main_full
-The main_full branch has a bunch of updates and includes a lot of new features.
-
-This main branch will be discontinued and not further developed.
-I am leaving it as-is because some people may want the simple typewriter with no extra software features. And it is a small codebase.
+PiQuill started as a fork of [ZeroWriter](https://github.com/zerowriter/zerowriter1) and has since diverged from it. Credit to ZeroWriter, and before it to https://penkesu.computer/, for the original idea.
 
 ----------
 
@@ -28,11 +10,9 @@ An easy, DIY eink typewriter running on a raspberry pi zero. Perfect for beginne
 
 This project is open-source. Do whatever you want with it. Please note the display drivers and waveshare code belongs to them. But buy their displays, they rock.
 
-Credit to: https://penkesu.computer/ for the original project that inspired this.
+Components list: docs/componentslist
 
-Components list: https://github.com/zerowriter/zerowriter1/blob/main/docs/componentslist
-
-pi zero setup steps: https://github.com/zerowriter/zerowriter1/blob/main/docs/how-to-setup-your-pi
+pi zero setup steps: docs/how-to-setup-your-pi
 
 ----------
  
@@ -60,7 +40,7 @@ Use a Pi Zero 2W. Don't use an original Zero. The extra power is very useful.
 
 Setup / Getting Started:
 
-https://github.com/zerowriter/zerowriter1/blob/main/docs/how-to-setup-your-pi
+docs/how-to-setup-your-pi
 
 - requires pi zero 2w running bookworm, light install recomend (headless/no GUI)
 - set up ssh and configure your pi zero remotely via terminal or powershell

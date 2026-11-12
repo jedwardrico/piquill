@@ -1,4 +1,4 @@
-# Inline text formatting (bold / italic / underline) for ZeroWriter.
+# Inline text formatting (bold / italic / underline) for PiQuill.
 #
 # Formatting is stored in the text itself as invisible control characters that
 # toggle a style on/off, e.g. "plain \x01bold\x01 plain". They take no screen

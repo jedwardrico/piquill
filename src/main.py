@@ -1,8 +1,7 @@
 #
-# ZeroWriter
+# PiQuill
 #
 # This code is open-source. Feel free to modify and redistribute as you want.
-# Participate on reddit in r/zerowriter if you want.
 #
 # Using the epd5in76 library (Good Display GDEH0576T81, 920x680, SSD2677)
 #
@@ -669,7 +668,7 @@ def handle_key_press(e):
     if e.name == "esc" and control_active: #ctrl+esc
         #run powerdown script
         display_draw.rectangle((0, 0, SCREEN_W, SCREEN_H), fill=255)  # Clear display
-        msg = "ZeroWriter Powered Down."
+        msg = "PiQuill Powered Down."
         display_draw.text(((SCREEN_W - font24.getlength(msg)) // 2, SCREEN_H // 2), msg, font=font24, fill=0)
         partial_buffer = epd.getbuffer(display_image)
         epd.display(partial_buffer)

@@ -19,7 +19,7 @@ https://www.raspberrypi.com/software/
 
 - Use the gear icon to add extra settings to your install: 
 
-- Add your WIFI credentials. Set a hostname (zerowriter.local suggested) and username/password (zero/whateveryouwant) which will be used for connecting
+- Add your WIFI credentials. Set a hostname (piquill.local suggested) and username/password (zero/whateveryouwant) which will be used for connecting
 
 - Enable SSH. This is required so you can configure the typewriter remotely, without a traditional display.
 
@@ -30,7 +30,7 @@ https://www.raspberrypi.com/software/
 - Install the SD card to the Pi, and connect to power. You should see blinking lights as it completes the first boot.
 - After a minute or so, open up Windows Power Shell or Terminal or whatever command line tool you want to use
 - Connect to your pi zero via: 
-- ssh zero@zerowriter.local
+- ssh zero@piquill.local
 - Your computer will connect to the pi zero and do some security stuff -- if you have errors here, there's usually an easy fix if you google it.
 - You will connect and be greeted with the pi zero's command line, woohoo, you are in the matrix.
 
@@ -54,11 +54,11 @@ note: "if you get externally managed error:" sudo pip3 install keyboard --break-
 Lastly, clone the code to your pi so you can run the typewriter:
 
 - sudo apt install git
-- git clone https://github.com/zerowriter/zerowriter1.git
+- git clone https://github.com/jedwardrico/piquill.git
 
 Navigate to the typewriter's directory and run it:
 
-- cd zerowriter1
+- cd piquill
 - cd src
 - sudo python main.py
 
@@ -70,7 +70,7 @@ If you followed these steps, and you connected the display correctly, you should
 Crontab just gets your pi zero to run stuff on boot up. We aren't interested in any of the linux stuff (well, I'm not) -- so we just boot to the program and that's all that we need.
   
 - at command line, type "crontab -e" (choose the option for the nano editor)
-- scroll to the bottom and add the line: "@reboot cd zerowriter1/src/ && sudo python main.py &"
+- scroll to the bottom and add the line: "@reboot cd piquill/src/ && sudo python main.py &"
 - CTRL + O to save (write out) the file, CTRL + X to exit. You should see confirmation that crontab updated.
 - "sudo reboot now" and restart, it should boot to the typewriter automatically now.
 - note: if you have trouble with your typewriter, i'd suggest commenting out the crontab line and controlling everything yourself manually via SSH until you resolve whatever issue you have.
@@ -88,4 +88,4 @@ You can adjust your Pi Zero's settings to get better theoretical performance at 
 
 If you want to easily access your files from another computer, you should install SMB to your pi.
 https://pimylifeup.com/raspberry-pi-samba/
-This means you can access the data on the zerowriter from any local device :-)
+This means you can access the data on the piquill from any local device :-)

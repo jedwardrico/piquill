@@ -91,6 +91,7 @@ display_updating = False
 shift_active = False
 control_active = False
 exit_cleanup = False
+shutting_down = False  # set when the OS asks us to stop (power button)
 console_message = ""
 scrollindex=1
 
@@ -581,12 +582,15 @@ def console_message_set(msg):
     global console_message
     console_message = msg
 
-def power_down(msg):
-    """Save the work, show a message on the screen and power the Pi off."""
-    save_current_doc()
+def show_shutdown_message(msg):
     display_draw.rectangle((0, 0, SCREEN_W, SCREEN_H), fill=255)  # Clear display
     display_draw.text(((SCREEN_W - font24.getlength(msg)) // 2, SCREEN_H // 2), msg, font=font24, fill=0)
     epd.display(epd.getbuffer(display_image))
+
+def power_down(msg):
+    """Save the work, show a message on the screen and power the Pi off."""
+    save_current_doc()
+    show_shutdown_message(msg)
     time.sleep(3)
     os.sync()
     subprocess.run(['sudo', 'poweroff', '-f'])
@@ -804,6 +808,13 @@ def handle_key_press(e):
     input_catchup==True
     needs_input_update = True
     
+def handle_terminate(signum, frame):
+    """The power button (and `shutdown`) make the OS send SIGTERM: stop the main loop
+    and let the cleanup at the bottom save the work and show the shutdown message."""
+    global exit_cleanup, shutting_down
+    shutting_down = True
+    exit_cleanup = True
+
 def handle_interrupt(signal, frame):
     keyboard.unhook_all()
     epd.init()
@@ -815,6 +826,7 @@ def handle_interrupt(signal, frame):
 keyboard.on_press(handle_key_down, suppress=False) #handles modifiers and shortcuts
 keyboard.on_release(handle_key_press, suppress=True)
 signal.signal(signal.SIGINT, handle_interrupt)
+signal.signal(signal.SIGTERM, handle_terminate)
 
 #init_display routine
 epd.init()
@@ -851,7 +863,16 @@ except KeyboardInterrupt:
 
 finally:
     keyboard.unhook_all()
-    epd.init()
-    time.sleep(1)
-    epd.Clear()
-    epd.sleep()
+    if shutting_down:
+        # wait (briefly) for any screen update in progress, then save and say goodbye
+        deadline = time.time() + 5
+        while (display_updating or updating_input_area) and time.time() < deadline:
+            time.sleep(0.05)
+        save_current_doc()
+        show_shutdown_message("PiQuill Powered Down.")
+        epd.sleep()
+    else:
+        epd.init()
+        time.sleep(1)
+        epd.Clear()
+        epd.sleep()

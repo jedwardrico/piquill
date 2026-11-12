@@ -1,6 +1,6 @@
 """Battery level from a MAX17048 fuel gauge on the Pi's I2C bus.
 
-The MAX17048 (I2C address 0x36) estimates state of charge from the cell voltage,
+The MAX17048 (I2C address 0x36, on the software I2C bus /dev/i2c-3) estimates state of charge from the cell voltage,
 so it needs no current-sense wiring. If the gauge or the I2C libraries are missing,
 everything here quietly reports "no battery" and PiQuill runs as before.
 
@@ -27,7 +27,7 @@ REG_VCELL = 0x02   # cell voltage, 78.125 uV per bit
 REG_SOC = 0x04     # state of charge, high byte = whole %, low byte = 1/256 %
 REG_CRATE = 0x16   # charge/discharge rate, signed, 0.208 %/hour per bit (MAX17048/49 only)
 
-I2C_BUS = int(os.environ.get('ZW_BATTERY_BUS', 1))
+I2C_BUS = int(os.environ.get('ZW_BATTERY_BUS', 3))   # software I2C on GPIO5/6, see docs/WIRING.md
 POLL_SECONDS = int(os.environ.get('ZW_BATTERY_POLL', 30))
 SMOOTHING_SAMPLES = 5      # the reported percent is the median of this many readings
 CHARGING_RATE = 0.5        # %/hour above which the cell counts as charging

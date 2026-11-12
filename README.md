@@ -15,7 +15,7 @@ PiQuill began as a fork of [ZeroWriter](https://github.com/zerowriter/zerowriter
 - Good Display **DESPI-C02** adapter board (DIP switch P3 set to **2.2**)
 - Any USB keyboard, plus a USB OTG adapter or cable for the Pi's data port
 - Power: a USB power supply or any power bank, or a single-cell LiPo with a charger/boost board
-- Optional: a MAX17048 fuel gauge (shows the battery percentage) and a DPDT switch as the power switch; see [docs/WIRING.md](docs/WIRING.md)
+- Optional: a MAX17048 fuel gauge (shows the battery percentage) and a push button for safe on/off; see [docs/WIRING.md](docs/WIRING.md)
 
 The GDEH0576T81 is the only panel this code supports. Pin connections and board
 settings are in [docs/WIRING.md](docs/WIRING.md).
@@ -66,6 +66,7 @@ bar, session time, word count, character count and the current file name.
 | Arrow keys | Scroll back through earlier pages |
 | Tab | Insert two spaces |
 | Ctrl+Esc | Save and power down the Pi |
+| Power button | Press to shut down (saves first) or, when halted, to turn on |
 
 If a MAX17048 is connected, the bottom right of the status panel shows the battery
 percentage (`Bat 87%`, with a `+` while charging). Below 15% it reads `LOW`. At 5% or
@@ -122,7 +123,7 @@ adjust that when starting `main.py`:
 | `ZW_BATTERY_WARN` | 15 | Percent at or below which the panel shows `LOW` |
 | `ZW_BATTERY_SHUTDOWN` | 5 | Percent at or below which PiQuill saves and powers off (not while charging) |
 | `ZW_BATTERY_POLL` | 30 | Seconds between battery readings |
-| `ZW_BATTERY_BUS` | 1 | I2C bus number |
+| `ZW_BATTERY_BUS` | 3 | I2C bus number (3 is the software bus from the wiring guide) |
 | `ZW_CLOUD_REMOTE` | unset | rclone destination for backups, e.g. `gdrive:PiQuill` |
 | `ZW_CLOUD_TIMEOUT` | 120 | Seconds before a backup is given up on |
 

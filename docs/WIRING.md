@@ -30,52 +30,58 @@ datasheet (header P2 labels, DIP switch P3). Pi pins come from `epdconfig.py`
 | GND           | -      | 6 (or 9, 14, 20, 25) | ground |
 | 3.3V          | -      | 1 (or 17)       | power |
 
-## Battery gauge (MAX17048) and power switch
+## Power button (safe on and off)
 
-The display uses SPI and the gauge uses I2C, so they share no pins. Enable I2C with
-`dtparam=i2c_arm=on` in `config.txt` (or `sudo raspi-config`), and install the
-library: `sudo apt install python3-smbus`.
+A momentary push button on **GPIO3** (pin 5) turns the Pi on and shuts it down cleanly.
+GPIO3 is the only pin that can wake a halted Pi, so the button must go there.
+
+```
+ push button            Raspberry Pi (40-pin header)
+ -----------            ----------------------------
+ one side   -------->   Pin 5   GPIO3
+ other side -------->   Pin 14  GND  (any GND pin)
+```
+
+Add this line to `config.txt`:
+
+```
+dtoverlay=gpio-shutdown
+```
+
+- Press while running: the Pi shuts down. PiQuill saves your work, shows
+  "PiQuill Powered Down." and the Pi halts.
+- Press while halted: the Pi boots.
+- GPIO3 already has a pull-up on the Pi, so the button needs no resistor.
+- GPIO3 is also the hardware I2C clock pin. Do not enable `dtparam=i2c_arm=on`; the
+  battery gauge uses a software I2C bus on other pins instead (next section).
+- A halted Pi still draws a small standby current from the battery, so it will drain
+  slowly. For long storage, unplug the battery or add a hard switch in the battery lead.
+  Use a protected LiPo cell, because the Pi cannot cut its own power.
+
+## Battery gauge (MAX17048)
+
+The gauge uses a software ("bit-banged") I2C bus on GPIO5 and GPIO6, because the
+hardware I2C pins would clash with the power button. The display uses SPI, so no pins
+are shared. Add this line to `config.txt` and install the library with
+`sudo apt install python3-smbus`:
+
+```
+dtoverlay=i2c-gpio,bus=3,i2c_gpio_sda=5,i2c_gpio_scl=6
+```
 
 ```
  MAX17048 breakout      Raspberry Pi (40-pin header)
  -----------------      ----------------------------
- SDA   <------------->  Pin 3   GPIO2 (I2C1 SDA)
- SCL   <------------->  Pin 5   GPIO3 (I2C1 SCL)
- GND   -------------    Pin 9   GND
+ SDA   <------------->  Pin 29  GPIO5
+ SCL   <------------->  Pin 31  GPIO6
+ GND   -------------    Pin 30  GND
  VIN   <-------------   Pin 17  3V3
- BAT   <-------------   battery + (see "Power switch" below)
+ BAT   <-------------   battery + (the cell, not the Pi's 5V rail)
 ```
 
-Pin labels differ between breakouts, so check yours. The gauge's battery pin must be
-wired to the cell, not to the Pi's 5V rail. Its I2C address is 0x36. Check that the Pi
-sees it with `sudo apt install i2c-tools` then `i2cdetect -y 1`.
-
-## Power switch (DPDT, 2 position)
-
-The Pi Zero has no power button, so a switch in the battery supply turns the whole
-device on and off. Wire it in the battery positive lead between the battery (and
-gauge) and the charger/boost board that feeds the Pi:
-
-```
- battery +  ----+---------------------+---- gauge BAT
-                 |                     |
-              [ DPDT: pole 1 and pole 2 wired in parallel ]
-                 |
-                 +---- charger / boost board input +
- battery -  ---------------------------- common ground
-```
-
-- Tie the two poles together (both commons joined, both "on" throws joined). Small
-  DPDT switches are rated for about 0.5 A per pole, and the Pi can pull about 1 A
-  from the battery at start-up, so doubling the contacts matters.
-- Leave the other throw (the "off" position) unconnected.
-- Put the gauge on the battery side of the switch so it keeps tracking the cell
-  while the device is off.
-- Flipping the switch cuts power immediately. Press Ctrl+Esc first for a clean
-  shutdown. Text is cached on every Enter, so little is lost if you forget.
-- If your charger board is on the switched side, the battery cannot charge while
-  the switch is off. Put the switch between the charger board and the boost
-  converter if you want to charge with the device off.
+Pin labels differ between breakouts, so check yours. The bus needs pull-up resistors
+to 3.3V; most breakouts include them. The gauge's I2C address is 0x36. Check that the
+Pi sees it with `sudo apt install i2c-tools` then `i2cdetect -y 3`.
 
 These instructions assume a single-cell LiPo with a separate charger/boost board.
 They are untested on hardware; check polarity and your boards' pinouts before

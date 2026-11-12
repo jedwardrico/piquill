@@ -5,11 +5,12 @@ A separate, standalone variant of PiQuill built around an Unexpected Maker
 this folder only. Nothing in `src/`, `docs/` or the top-level README is used or
 changed by it, and the Pi version keeps working as before.
 
-**Status:** display driver written (`src/epd5in76.*`) with a bring-up sketch in
-`src/main.cpp`. Nothing has been run on the ESP32 or the panel yet. On a PC, the
-driver's command/data stream was compared byte for byte against the Python
-driver (full, partial, windowed and post-sleep updates, all four flip settings)
-and matched; it has not been compiled with the Arduino-ESP32 toolchain.
+**Status:** feature-complete on paper, untested on hardware. The firmware has the
+same features as the Pi version (typing, bold/italic/underline, page scrolling,
+status panel with battery, save / rename / open / new / delete), except cloud
+backup. Everything that does not touch hardware is checked on a PC against the
+Python code (see Tests). Nothing has been built with PlatformIO or run on the
+ESP32, the panel or the keyboard yet.
 
 ## Why a separate device
 
@@ -47,20 +48,41 @@ Wiring and open questions: [docs/WIRING.md](docs/WIRING.md).
 Rough order of work:
 
 1. ~~Blink / serial "hello" to confirm the toolchain and board~~ (replaced by the display test)
-2. Display driver: init, full refresh, partial refresh (written, needs hardware test)
-3. BLE keyboard client (written: `ble_keyboard`, `hid_keys`; the BLE part has never
-   been compiled against the real library or run with a keyboard)
-4. Text buffer, wrapping and drawing (written: `text_buffer`, `text_render`, bitmap
-   font from `tools/gen_font.py`; bold/italic and the status panel not ported yet)
-5. Save/load, deep sleep, battery gauge
-6. Optional: Wi-Fi sync
+2. Display driver: init, full refresh, partial refresh (`epd5in76`; needs hardware test)
+3. BLE keyboard client (`ble_keyboard`, `hid_keys`; the BLE part has never been
+   compiled against the real library or run with a keyboard)
+4. Text, formatting and drawing (`text_buffer`, `textfmt`, `gfx`, bitmap fonts from
+   `tools/gen_font.py`)
+5. Editor, saving and loading (`editor`, `doc_store`, `storage_littlefs` on the
+   flash), status panel (`ui`) and battery gauge (`battery`)
+6. Optional: Wi-Fi sync, cloud backup
+
+## Keys
+
+Same as the Pi version. Typing, Enter (ends a line and saves), Backspace;
+**Up/Left** scroll back a page, **Down/Right** forward (the Pi's arrow keys scroll
+pages, they do not move a cursor); **Ctrl+B/I/U** bold, italic, underline;
+**Ctrl+S** save (asks for a name the first time), **Ctrl+R** rename, **Ctrl+O** open
+(Up/Down choose, Shift = a page, Enter open, Delete then y/n, Esc cancel),
+**Ctrl+N** new file, **Ctrl+Esc** power down (save, show a message, deep sleep;
+press RESET to start again). Documents are Markdown files in `/documents` on the
+board's flash. The board has no clock, so a file's date is only shown once the
+time has been set (nothing sets it yet); "most recent first" uses `/recent.txt`.
 
 ## Tests
 
-`test/run_tests.sh` runs on a PC (needs g++ and python3, no ESP32): it checks that
-the text buffer wraps lines exactly like the Pi's typing logic, and that the HID
-key decoder handles shift, caps lock, rollover and key repeat correctly. The BLE
-connection code itself can only be tested with the board and keyboard.
+`test/run_tests.sh` runs on a PC (needs g++, python3 and Pillow; no ESP32). Where
+the Python code from `src/` exists, the C++ is compared against it directly:
+
+- text buffer wrapping, including style markers, over thousands of random keystrokes
+- `textfmt` and Markdown conversion on thousands of random strings
+- file-name cleaning, and the battery gauge arithmetic (including its rounding)
+
+The editor (save, rename, open, new, delete, prompts, page scrolling) is checked with
+scripted sessions on a real folder, and the HID key decoder (shift, caps lock,
+rollover, key repeat) with hand-written cases. `test/render_demo.cpp` draws sample
+screens to image files for a visual check. Not covered, because it needs the
+hardware: the display driver on the panel, BLE, LittleFS, and the I2C gauge.
 
 ## Building
 
@@ -76,5 +98,5 @@ pairing mode the first time; after that the bond is remembered.
 
 ## Not planned (for now)
 
-Classic Bluetooth keyboards (the S3 is BLE only), the cloud backup, and
-Markdown-style formatting from `textfmt.py`.
+Classic Bluetooth keyboards (the S3 is BLE only) and the Pi's cloud backup
+(Ctrl+E). Setting the clock (so file dates show) would need Wi-Fi time sync.

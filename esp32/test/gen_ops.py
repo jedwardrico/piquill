@@ -17,9 +17,12 @@ for _ in range(900):
             ops.pop()
     elif x < 0.88:
         ops.append('e')
-    elif x < 0.93:
+    elif x < 0.90:
         ops.append('t')
+    elif x < 0.95:
+        ops.append(r.choice('BIU'))
     else:
         ops.extend('b' for _ in range(r.randint(1, 4)))
-ops += ['c' + c for c in 'x' * 130]  # one long unbroken word
+ops += ['c' + c for c in 'x' * 130]
+ops += ['B'] + ['c' + c for c in 'bold across a wrapped line ' * 4] + ['B', 'e']  # one long unbroken word
 open(sys.argv[1], 'w').write('\n'.join(ops) + '\n')

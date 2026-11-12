@@ -1,7 +1,7 @@
 # PiQuill ESP32 (work in progress)
 
-A separate, standalone variant of PiQuill built around an Adafruit **ESP32-S3
-Feather (8 MB flash, 2 MB PSRAM)** instead of a Raspberry Pi Zero 2 W. It lives in
+A separate, standalone variant of PiQuill built around an Unexpected Maker
+**FeatherS3-family ESP32-S3 Feather** instead of a Raspberry Pi Zero 2 W. It lives in
 this folder only. Nothing in `src/`, `docs/` or the top-level README is used or
 changed by it, and the Pi version keeps working as before.
 
@@ -18,11 +18,11 @@ so this is a fresh firmware project that happens to drive the same panel. The go
 
 - Hours-to-weeks battery life (deep sleep between sessions)
 - About a second from power-on to typing
-- Fewer parts (the Feather has its own LiPo charger)
+- Fewer parts (the Feather has its own LiPo charger and fuel gauge)
 
 ## Hardware
 
-- Adafruit ESP32-S3 Feather, 8 MB flash / 2 MB PSRAM
+- Unexpected Maker FeatherS3 family board (pinout from the FeatherS3[D] sheet)
 - Good Display GDEH0576T81 panel + DESPI-C02 adapter (DIP switch P3 = 2.2), same as the Pi build
 - USB keyboard (USB host) powered from a 5 V boost converter (Pololu U3V40F5 or similar)
 - LiPo cell on the Feather's JST connector
@@ -31,7 +31,8 @@ Wiring and open questions: [docs/WIRING.md](docs/WIRING.md).
 
 ## Firmware plan
 
-- Toolchain: PlatformIO with the Arduino-ESP32 framework (`platformio.ini`).
+- Toolchain: PlatformIO with the Arduino-ESP32 framework on the pioarduino
+  platform (`platformio.ini`).
   CircuitPython is not used because the ESP32-S3 USB host support it needs for a
   keyboard is the main risk, and ESP-IDF/Arduino have working USB host HID.
 - Display driver: port of `src/waveshare_epd/epd5in76.py` (itself a port of Good

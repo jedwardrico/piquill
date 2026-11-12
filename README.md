@@ -14,7 +14,7 @@ PiQuill began as a fork of [ZeroWriter](https://github.com/zerowriter/zerowriter
 - Good Display **GDEH0576T81** 5.76" e-paper panel (920x680, SSD2677 controller)
 - Good Display **DESPI-C02** adapter board (DIP switch P3 set to **2.2**)
 - Any USB keyboard, plus a USB OTG adapter or cable for the Pi's data port
-- Power: a USB power supply or any power bank, or a single-cell LiPo with a charger/boost board
+- Power: a USB power supply or any power bank, or an 18650 cell with a protected TP4056 USB-C charger module and a 5 V boost converter
 - Optional: a MAX17048 fuel gauge (shows the battery percentage) and a Pololu push-button power switch (item 2808) with one two-pole push button for safe on/off; see [docs/WIRING.md](docs/WIRING.md)
 
 The GDEH0576T81 is the only panel this code supports. Pin connections and board

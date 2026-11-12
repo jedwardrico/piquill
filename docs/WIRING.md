@@ -46,9 +46,11 @@ How it works:
   step of the shutdown, the Pi raises its OFF pin and the board cuts power.
 
 ```
- battery + --> charger/boost board --> 5V --> Pololu VIN
-                                             Pololu VOUT --> Pi 5V (pin 2)
- all grounds common  (Pololu GND, Pi GND, battery -)
+ USB-C --> TP4056 module --B+/B--> 18650 cell
+              OUT+  ---------------> Pololu VIN
+                                     Pololu VOUT --> 5V boost converter IN+
+                                                     boost OUT+ --> Pi 5V (pin 2)
+ all grounds common  (TP4056 OUT-, Pololu GND, boost GND, Pi GND)
 
  Pololu OFF  <-------------- Pi pin 37  GPIO26   (gpio-poweroff)
  Pololu A    -- button pole 1 -- GND              (turn on)
@@ -75,11 +77,18 @@ dtoverlay=gpio-poweroff,gpiopin=26
   hangs, but remember it does not shut down cleanly.
 - If the Pi hangs and does not shut down, the button cannot turn it off. Use the
   board's own button, or disconnect the battery.
-- Place the switch on the 5 V line (between the charger/boost board and the Pi) so
-  the battery can charge while the device is off. The charger/boost board then keeps
-  drawing its own idle current; check it for a low-current or shutdown mode if standby
-  time matters. The switch can also go in the battery lead (the LV runs from 2.2 V),
-  but then the battery cannot charge while it is off.
+- The switch sits between the TP4056's protected output (OUT+/OUT-) and the boost
+  converter. The charger is upstream of it, so the cell charges from USB-C even when
+  the device is off, and with the switch off nothing downstream draws current.
+  Use the **protected** TP4056 version (six pads: IN, OUT and B). Its OUT pads go
+  through the cell protection; the B pads connect to the cell.
+- The TP4056 is only a charger. It has no 5 V output, so you also need a **5 V boost
+  converter** with a comfortable margin: the Pi Zero 2 W can pull about 1 A at 5 V,
+  which is well over 1.5 A from the cell. Pick a module rated for 2 A or more that
+  works down to about 3 V in. The switch itself handles about 3 A continuous.
+- Avoid using the device while charging. The TP4056 has no power-path logic, so a load
+  on the cell keeps it from detecting the end of charge, and it can sit at 4.2 V
+  longer than is good for the cell. Charge with the device off.
 - Pololu's warning applies: do not use this as an emergency cutoff or safety
   disconnect.
 
@@ -98,16 +107,16 @@ pins are shared. Enable I2C with `dtparam=i2c_arm=on` in `config.txt` (or
  SCL   <------------->  Pin 5   GPIO3 (I2C1 SCL)
  GND   -------------    Pin 9   GND
  VIN   <-------------   Pin 17  3V3
- BAT   <-------------   battery + (the cell, not the Pi's 5V rail)
+ BAT   <-------------   battery + (the cell side, not the Pi's 5V rail)
 ```
 
 Pin labels differ between breakouts, so check yours. The gauge's I2C address is
 0x36. Check that the Pi sees it with `sudo apt install i2c-tools` then
 `i2cdetect -y 1`. Connect the gauge directly to the battery, before the power switch,
-so it keeps tracking the cell while the device is off.
+so it keeps tracking the cell while the device is off (use the TP4056's OUT+ pad, or B+).
 
-These instructions assume a single-cell LiPo with a separate charger/boost board.
-They are untested on hardware; check polarity and your boards' pinouts before
+These instructions assume a TP4056 charger module with protection, a single 18650 cell
+and a separate 5 V boost converter. They are untested on hardware; check polarity and your boards' pinouts before
 connecting a battery.
 
 ## Board settings

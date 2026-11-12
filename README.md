@@ -14,7 +14,8 @@ PiQuill began as a fork of [ZeroWriter](https://github.com/zerowriter/zerowriter
 - Good Display **GDEH0576T81** 5.76" e-paper panel (920x680, SSD2677 controller)
 - Good Display **DESPI-C02** adapter board (DIP switch P3 set to **2.2**)
 - Any USB keyboard, plus a USB OTG adapter or cable for the Pi's data port
-- Power: a USB power supply or any power bank
+- Power: a USB power supply or any power bank, or a single-cell LiPo with a charger/boost board
+- Optional: a MAX17048 fuel gauge (shows the battery percentage) and a DPDT switch as the power switch; see [docs/WIRING.md](docs/WIRING.md)
 
 The GDEH0576T81 is the only panel this code supports. Pin connections and board
 settings are in [docs/WIRING.md](docs/WIRING.md).
@@ -30,7 +31,7 @@ In short:
 
    ```bash
    sudo apt update
-   sudo apt install python3-pip python3-spidev python3-rpi.gpio python3-pil python3-numpy git
+   sudo apt install python3-pip python3-spidev python3-rpi.gpio python3-pil python3-numpy python3-smbus git
    sudo pip3 install keyboard --break-system-packages
    ```
 
@@ -64,7 +65,13 @@ bar, session time, word count, character count and the current file name.
 | Ctrl+B / Ctrl+I / Ctrl+U | Toggle bold / italic / underline for what you type next |
 | Arrow keys | Scroll back through earlier pages |
 | Tab | Insert two spaces |
-| Ctrl+Esc | Power down the Pi |
+| Ctrl+Esc | Save and power down the Pi |
+
+If a MAX17048 is connected, the bottom right of the status panel shows the battery
+percentage (`Bat 87%`, with a `+` while charging). Below 15% it reads `LOW`. At 5% or
+less, while not charging, PiQuill saves your work and powers off before the battery
+runs out. With no gauge connected, nothing is shown and nothing changes. The
+percentage is refreshed with the rest of the panel, not on its own timer.
 
 Your work in progress is cached in `src/data/cache.txt` and restored the next time
 the program starts, so nothing is lost if the power is pulled.
@@ -112,6 +119,10 @@ adjust that when starting `main.py`:
 | `ZW_STRIP_REPEAT` | 1 | Repeat each strip update for more contrast |
 | `ZW_FULL_REFRESH_AFTER` | 60 | Partial updates before a full-screen refresh |
 | `ZW_TIMING` | off | Set to `1` to print how long each update takes |
+| `ZW_BATTERY_WARN` | 15 | Percent at or below which the panel shows `LOW` |
+| `ZW_BATTERY_SHUTDOWN` | 5 | Percent at or below which PiQuill saves and powers off (not while charging) |
+| `ZW_BATTERY_POLL` | 30 | Seconds between battery readings |
+| `ZW_BATTERY_BUS` | 1 | I2C bus number |
 | `ZW_CLOUD_REMOTE` | unset | rclone destination for backups, e.g. `gdrive:PiQuill` |
 | `ZW_CLOUD_TIMEOUT` | 120 | Seconds before a backup is given up on |
 
@@ -124,6 +135,7 @@ Panel orientation and the SPI clock live in `src/waveshare_epd/epd5in76.py`; see
 src/main.py             application: key handling, rendering, files
 src/textfmt.py          bold/italic/underline handling
 src/cloud.py            rclone backup
+src/battery.py          MAX17048 battery gauge
 src/keymaps.py          shift key map
 src/waveshare_epd/      display driver
 docs/                   wiring, cloud backup

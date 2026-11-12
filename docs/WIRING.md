@@ -48,9 +48,9 @@ How it works:
 ```
  USB-C --> TP4056 module --B+/B--> 18650 cell
               OUT+  ---------------> Pololu VIN
-                                     Pololu VOUT --> 5V boost converter IN+
-                                                     boost OUT+ --> Pi 5V (pin 2)
- all grounds common  (TP4056 OUT-, Pololu GND, boost GND, Pi GND)
+                                     Pololu VOUT --> U3V40F5 VIN
+                                                     U3V40F5 VOUT --> Pi 5V (pin 2)
+ all grounds common  (TP4056 OUT-, Pololu GND, U3V40F5 GND, Pi GND)
 
  Pololu OFF  <-------------- Pi pin 37  GPIO26   (gpio-poweroff)
  Pololu A    -- button pole 1 -- GND              (turn on)
@@ -82,10 +82,27 @@ dtoverlay=gpio-poweroff,gpiopin=26
   the device is off, and with the switch off nothing downstream draws current.
   Use the **protected** TP4056 version (six pads: IN, OUT and B). Its OUT pads go
   through the cell protection; the B pads connect to the cell.
-- The TP4056 is only a charger. It has no 5 V output, so you also need a **5 V boost
-  converter** with a comfortable margin: the Pi Zero 2 W can pull about 1 A at 5 V,
-  which is well over 1.5 A from the cell. Pick a module rated for 2 A or more that
-  works down to about 3 V in. The switch itself handles about 3 A continuous.
+- The TP4056 is only a charger. It has no 5 V output, so a boost converter makes the
+  5 V for the Pi: a [Pololu 5V Step-Up Voltage Regulator
+  U3V40F5](https://www.pololu.com/product/4012) (item 4012). From its datasheet: fixed
+  5 V (+/-4%), 90-95% efficient, starts from 2.7 V in, and delivers roughly 2 A at 3 V
+  in and about 3 A at 4 V in, comfortably above what the Pi Zero 2 W needs.
+  - Wire VIN to the Pololu switch's VOUT, GND to ground, and VOUT to the Pi's 5 V pin
+    (pin 2). Leave EN unconnected (it has an on-board pull-up and stays enabled).
+    VIN and GND each have two pads; use one pair.
+  - Solder a 33 uF electrolytic capacitor (10 V or more, `+` to VIN) between VIN and GND
+    next to the regulator. Pololu recommends this to absorb voltage spikes when power
+    is applied.
+  - VIN must stay below the 5 V output. A single cell (at most 4.2 V) is fine.
+  - It has **no short-circuit protection and no reverse-voltage protection**. The
+    Pololu switch in front of it provides reverse-voltage protection. For shorts on the
+    5 V side, add a resettable fuse (polyfuse) of about 2 A in the 5 V lead to the Pi.
+    That fuse is my suggestion, not from Pololu's documentation.
+  - A boost converter with this design passes VIN straight through to VOUT when it is
+    off or not yet boosting. That is not a problem here, because the Pololu switch
+    removes VIN completely when the device is off.
+  - Its idle draw (under 2 mA) does not matter, because the switch removes power from it
+    when the device is off. It can get hot to the touch under load.
 - Avoid using the device while charging. The TP4056 has no power-path logic, so a load
   on the cell keeps it from detecting the end of charge, and it can sit at 4.2 V
   longer than is good for the cell. Charge with the device off.
@@ -116,7 +133,7 @@ Pin labels differ between breakouts, so check yours. The gauge's I2C address is
 so it keeps tracking the cell while the device is off (use the TP4056's OUT+ pad, or B+).
 
 These instructions assume a TP4056 charger module with protection, a single 18650 cell
-and a separate 5 V boost converter. They are untested on hardware; check polarity and your boards' pinouts before
+and a Pololu U3V40F5 boost regulator. They are untested on hardware; check polarity and your boards' pinouts before
 connecting a battery.
 
 ## Board settings

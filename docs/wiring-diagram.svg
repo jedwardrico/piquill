@@ -1,0 +1,203 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1240 1040" width="1240" height="1040" font-family="Helvetica, Arial, sans-serif" font-size="13">
+  <rect width="1240" height="1040" fill="#ffffff"/>
+  <style>
+    .box { fill:#f4f6f8; stroke:#33414d; stroke-width:2; }
+    .pi  { fill:#e8f3ea; stroke:#2f6b3a; stroke-width:2.5; }
+    .t   { fill:#1b252d; }
+    .h   { font-size:16px; font-weight:bold; fill:#1b252d; }
+    .s   { font-size:11px; fill:#56636d; }
+    .w   { fill:none; stroke-width:2.5; stroke-linejoin:round; }
+    .spi { stroke:#1f6fd1; }
+    .i2c { stroke:#1a9a55; }
+    .pwr { stroke:#d1322a; }
+    .gnd { stroke:#222; }
+    .ctl { stroke:#e08a00; }
+    .dot { fill:#1b252d; }
+  </style>
+
+  <text x="20" y="32" class="h" style="font-size:20px">PiQuill wiring: Raspberry Pi Zero 2 W, DESPI-C02 / GDEH0576T81, MAX17048, power chain</text>
+  <text x="20" y="52" class="s">Pi pin labels: physical pin / BCM. Source: docs/WIRING.md. Untested on hardware; check polarity and pinouts before connecting a battery.</text>
+
+  <!-- Legend -->
+  <g transform="translate(960,560)">
+    <text x="0" y="0" class="h">Legend</text>
+    <line x1="0" y1="18" x2="40" y2="18" class="w spi"/><text x="50" y="22" class="t">SPI / display signals</text>
+    <line x1="0" y1="40" x2="40" y2="40" class="w i2c"/><text x="50" y="44" class="t">I2C (gauge)</text>
+    <line x1="0" y1="62" x2="40" y2="62" class="w pwr"/><text x="50" y="66" class="t">Power (+)</text>
+    <line x1="0" y1="84" x2="40" y2="84" class="w gnd"/><text x="50" y="88" class="t">Ground</text>
+    <line x1="0" y1="106" x2="40" y2="106" class="w ctl"/><text x="50" y="110" class="t">Power button / shutdown control</text>
+  </g>
+
+  <!-- ================= Raspberry Pi ================= -->
+  <rect x="440" y="80" width="320" height="620" rx="10" class="pi"/>
+  <text x="600" y="108" text-anchor="middle" class="h">Raspberry Pi Zero 2 W</text>
+  <text x="600" y="126" text-anchor="middle" class="s">40-pin header (BCM numbering)</text>
+
+  <!-- Pi left pins (gauge) -->
+  <g class="t">
+    <text x="452" y="204">Pin 3  GPIO2 SDA</text>
+    <text x="452" y="244">Pin 5  GPIO3 SCL</text>
+    <text x="452" y="284">Pin 9  GND</text>
+    <text x="452" y="404">Pin 17  3V3</text>
+  </g>
+  <!-- Pi right pins (display) -->
+  <g class="t" text-anchor="end">
+    <text x="748" y="164">Pin 1  3V3</text>
+    <text x="748" y="204">Pin 6  GND</text>
+    <text x="748" y="244">Pin 11  GPIO17</text>
+    <text x="748" y="284">Pin 18  GPIO24</text>
+    <text x="748" y="324">Pin 19  GPIO10 MOSI</text>
+    <text x="748" y="364">Pin 22  GPIO25</text>
+    <text x="748" y="404">Pin 23  GPIO11 SCLK</text>
+    <text x="748" y="444">Pin 24  GPIO8 CE0</text>
+  </g>
+  <!-- Pi bottom pins (power) -->
+  <g class="t" font-size="12">
+    <text transform="translate(484,690) rotate(-90)">Pin 37 GPIO26 (OFF out)</text>
+    <text transform="translate(534,690) rotate(-90)">Pin 13 GPIO27 (shutdown in)</text>
+    <text transform="translate(704,690) rotate(-90)">Pin 2  5V in</text>
+  </g>
+  <text x="600" y="520" text-anchor="middle" class="s">GPIO18 (PWR_PIN) and all other pins: leave unconnected</text>
+
+  <!-- ================= Display ================= -->
+  <rect x="960" y="130" width="240" height="340" rx="8" class="box"/>
+  <text x="1080" y="108" text-anchor="middle" class="h">DESPI-C02 header P2</text>
+  <text x="1080" y="124" text-anchor="middle" class="s">to GDEH0576T81 panel (FPC in P1)</text>
+  <g class="t">
+    <text x="972" y="164">3.3V</text>
+    <text x="972" y="204">GND</text>
+    <text x="972" y="244">RES</text>
+    <text x="972" y="284">BUSY</text>
+    <text x="972" y="324">SDI</text>
+    <text x="972" y="364">D/C</text>
+    <text x="972" y="404">SCK</text>
+    <text x="972" y="444">CS</text>
+  </g>
+  
+  <!-- Display wires (straight, left to right) -->
+  <line x1="760" y1="160" x2="960" y2="160" class="w pwr"/>
+  <line x1="760" y1="200" x2="960" y2="200" class="w gnd"/>
+  <line x1="760" y1="240" x2="960" y2="240" class="w spi"/>
+  <line x1="760" y1="280" x2="960" y2="280" class="w spi"/>
+  <line x1="760" y1="320" x2="960" y2="320" class="w spi"/>
+  <line x1="760" y1="360" x2="960" y2="360" class="w spi"/>
+  <line x1="760" y1="400" x2="960" y2="400" class="w spi"/>
+  <line x1="760" y1="440" x2="960" y2="440" class="w spi"/>
+  <text x="860" y="276" text-anchor="middle" class="s">display -&gt; Pi</text>
+
+  <g class="s">
+    <text x="960" y="494">DIP switch P3: set to 2.2 (SSD series)</text>
+    <text x="960" y="510">Power from 3.3V only. Never 5V.</text>
+  </g>
+
+  <!-- ================= MAX17048 ================= -->
+  <rect x="20" y="150" width="240" height="290" rx="8" class="box"/>
+  <text x="140" y="140" text-anchor="middle" class="h">MAX17048 gauge</text>
+  <g class="t" text-anchor="end">
+    <text x="248" y="204">SDA</text>
+    <text x="248" y="244">SCL</text>
+    <text x="248" y="284">GND</text>
+    <text x="248" y="344">BAT</text>
+    <text x="248" y="404">VIN</text>
+  </g>
+  <text x="32" y="176" class="s">I2C address 0x36</text>
+  <line x1="260" y1="200" x2="440" y2="200" class="w i2c"/>
+  <line x1="260" y1="240" x2="440" y2="240" class="w i2c"/>
+  <line x1="260" y1="280" x2="440" y2="280" class="w gnd"/>
+  <line x1="260" y1="400" x2="440" y2="400" class="w pwr"/>
+  <!-- BAT line out -->
+  <line x1="260" y1="340" x2="300" y2="340" class="w pwr"/>
+  <text x="20" y="462" class="s">BAT goes to TP4056 OUT+ (or B+), i.e. before the power switch,</text>
+  <text x="20" y="478" class="s">so the gauge keeps tracking the cell while the device is off.</text>
+
+  <!-- ================= Power chain ================= -->
+  <text x="20" y="742" class="h">Power chain</text>
+
+  <!-- USB-C -->
+  <rect x="20" y="770" width="90" height="70" rx="8" class="box"/>
+  <text x="65" y="810" text-anchor="middle" class="t">USB-C</text>
+  <line x1="110" y1="805" x2="150" y2="805" class="w pwr"/>
+
+  <!-- TP4056 -->
+  <rect x="150" y="760" width="170" height="130" rx="8" class="box"/>
+  <text x="235" y="782" text-anchor="middle" class="h">TP4056</text>
+  <text x="235" y="798" text-anchor="middle" class="s">protected, 6-pad</text>
+  <text x="158" y="810" class="t">IN</text>
+  <text x="312" y="810" text-anchor="end" class="t">OUT+</text>
+  <text x="312" y="850" text-anchor="end" class="t">OUT-</text>
+  <text x="235" y="882" text-anchor="middle" class="t">B+ / B-</text>
+
+  <!-- 18650 -->
+  <rect x="150" y="940" width="170" height="60" rx="8" class="box"/>
+  <text x="235" y="975" text-anchor="middle" class="t">18650 cell</text>
+  <line x1="235" y1="890" x2="235" y2="940" class="w pwr"/>
+
+  <!-- TP4056 -> Pololu -->
+  <line x1="320" y1="805" x2="360" y2="805" class="w pwr"/>
+  <line x1="320" y1="850" x2="360" y2="850" class="w gnd"/>
+
+  <!-- Pololu switch -->
+  <rect x="360" y="760" width="180" height="150" rx="8" class="box"/>
+  <text x="450" y="782" text-anchor="middle" class="h">Pololu 2808</text>
+  <text x="450" y="798" text-anchor="middle" class="s">pushbutton power switch (LV)</text>
+  <text x="368" y="810" class="t">VIN</text>
+  <text x="368" y="854" class="t">GND</text>
+  <text x="532" y="810" text-anchor="end" class="t">VOUT</text>
+  <text x="532" y="854" text-anchor="end" class="t">GND</text>
+  <text x="492" y="742" class="t" font-size="12">OFF</text>
+  <text x="400" y="898" text-anchor="middle" class="t" font-size="12">A</text>
+  <text x="500" y="898" text-anchor="middle" class="s">B, ON, CTRL: open</text>
+
+  <!-- OFF -> Pi pin 37 -->
+  <line x1="484" y1="760" x2="484" y2="700" class="w ctl"/>
+
+  <!-- Pololu -> U3V40F5 -->
+  <line x1="540" y1="805" x2="600" y2="805" class="w pwr"/>
+  <line x1="540" y1="850" x2="600" y2="850" class="w gnd"/>
+
+  <!-- U3V40F5 -->
+  <rect x="600" y="760" width="200" height="150" rx="8" class="box"/>
+  <text x="700" y="782" text-anchor="middle" class="h">U3V40F5</text>
+  <text x="700" y="798" text-anchor="middle" class="s">5 V boost, EN open</text>
+  <text x="608" y="810" class="t">VIN</text>
+  <text x="608" y="854" class="t">GND</text>
+  <text x="662" y="752" text-anchor="end" class="t" font-size="12">VOUT</text>
+  <text x="700" y="880" text-anchor="middle" class="s">33 uF cap VIN-GND (+ to VIN)</text>
+  <!-- 5V to Pi, polyfuse -->
+  <line x1="700" y1="760" x2="700" y2="700" class="w pwr"/>
+  <rect x="692" y="715" width="16" height="30" fill="#fff" stroke="#d1322a" stroke-width="2"/>
+  <text x="716" y="734" class="s">~2 A polyfuse (suggested)</text>
+
+  <!-- Button -->
+  <rect x="360" y="950" width="180" height="70" rx="8" class="box"/>
+  <text x="450" y="972" text-anchor="middle" class="h">Push button</text>
+  <text x="450" y="988" text-anchor="middle" class="s">2-pole momentary</text>
+  <text x="368" y="1010" class="t" font-size="12">pole 1</text>
+  <text x="532" y="1010" text-anchor="end" class="t" font-size="12">pole 2</text>
+  <!-- pole 1: Pololu A + GND -->
+  <line x1="400" y1="910" x2="400" y2="950" class="w ctl"/>
+  <text x="380" y="1034" class="s" font-size="11">pole 1 other side: GND</text>
+  <!-- pole 2 -> Pi GPIO27 -->
+  <path d="M540 995 H580 V730 H534 V700" class="w ctl"/>
+  <text x="590" y="1000" class="s">pole 2 other side: GND</text>
+  <!-- Pi pin 13 line label -->
+  <text x="588" y="720" class="s">to Pi pin 13</text>
+
+  <!-- common ground note -->
+  <text x="830" y="800" class="s">All grounds common:</text>
+  <text x="830" y="816" class="s">TP4056 OUT-, Pololu GND, U3V40F5 GND,</text>
+  <text x="830" y="832" class="s">Pi GND, gauge GND</text>
+
+  <!-- config.txt note -->
+  <g transform="translate(830,880)">
+    <text x="0" y="0" class="h">config.txt</text>
+    <text x="0" y="20" class="t" font-family="monospace">dtoverlay=gpio-shutdown,gpio_pin=27</text>
+    <text x="0" y="38" class="t" font-family="monospace">dtoverlay=gpio-poweroff,gpiopin=26</text>
+    <text x="0" y="56" class="t" font-family="monospace">dtparam=spi=on</text>
+    <text x="0" y="74" class="t" font-family="monospace">dtparam=i2c_arm=on</text>
+  </g>
+
+  <!-- Pi power-pin hints -->
+  <text x="20" y="690" class="s">Pi side: pin 2 (5V) fed by U3V40F5 VOUT; pin 37 raises OFF last in shutdown;</text>
+  <text x="20" y="706" class="s">pin 13 is pulled low by button pole 2 to start a clean shutdown.</text>
+</svg>

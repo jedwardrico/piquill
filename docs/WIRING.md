@@ -4,6 +4,8 @@ Sources: GDEH0576T81 datasheet (FPC pin table, section 1.5) and DESPI-C02
 datasheet (header P2 labels, DIP switch P3). Pi pins come from `epdconfig.py`
 (BCM numbering).
 
+![Wiring diagram](wiring-diagram.svg)
+
 ## DESPI-C02 header P2 (8 pins, top to bottom as printed on the board)
 
 ```

@@ -5,7 +5,11 @@ Feather (8 MB flash, 2 MB PSRAM)** instead of a Raspberry Pi Zero 2 W. It lives 
 this folder only. Nothing in `src/`, `docs/` or the top-level README is used or
 changed by it, and the Pi version keeps working as before.
 
-**Status:** planning and scaffolding. No firmware has been run on hardware yet.
+**Status:** display driver written (`src/epd5in76.*`) with a bring-up sketch in
+`src/main.cpp`. Nothing has been run on the ESP32 or the panel yet. On a PC, the
+driver's command/data stream was compared byte for byte against the Python
+driver (full, partial, windowed and post-sleep updates, all four flip settings)
+and matched; it has not been compiled with the Arduino-ESP32 toolchain.
 
 ## Why a separate device
 
@@ -39,8 +43,8 @@ Wiring and open questions: [docs/WIRING.md](docs/WIRING.md).
 
 Rough order of work:
 
-1. Blink / serial "hello" to confirm the toolchain and board
-2. Display driver: init, full refresh, partial refresh
+1. ~~Blink / serial "hello" to confirm the toolchain and board~~ (replaced by the display test)
+2. Display driver: init, full refresh, partial refresh (written, needs hardware test)
 3. USB host keyboard to serial
 4. Text buffer, wrapping and drawing
 5. Save/load, deep sleep, battery gauge

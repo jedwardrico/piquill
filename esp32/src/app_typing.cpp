@@ -12,7 +12,9 @@
 #include "editor.h"
 #include "epd5in76.h"
 #include "hid_keys.h"
+#include "settings.h"
 #include "storage_littlefs.h"
+#include "time_sync.h"
 #include "ui.h"
 
 static const char *KEYBOARD_NAME = "Keychron";   // substring of the BLE name
@@ -104,11 +106,21 @@ void setup() {
 
   if (!fs.begin()) Serial.println("Could not start the file system: nothing will be saved");
   battery.begin();
+  docs.setClock([] { return time(nullptr); });
   editor.begin();
   Serial.printf("Restored %d lines, document '%s', battery %s %d%%\n", (int)editor.text().lines().size(),
                 editor.docName().c_str(), battery.present() ? "ok" : "not found", battery.percent());
 
   redraw(Redraw::Display);
+
+  // Set the clock over Wi-Fi if /config.txt has a network (blocks up to ~15 s),
+  // then turn Wi-Fi off before BLE starts: they share the radio.
+  std::string cfg;
+  Settings settings;
+  if (fs.readFile("/config.txt", cfg)) settings = parseSettings(cfg);
+  else Serial.println("No /config.txt: clock will not be set (see config.example.txt)");
+  syncTime(settings);
+
   ble.begin(KEYBOARD_NAME);
 }
 

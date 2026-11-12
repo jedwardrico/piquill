@@ -66,8 +66,29 @@ pages, they do not move a cursor); **Ctrl+B/I/U** bold, italic, underline;
 (Up/Down choose, Shift = a page, Enter open, Delete then y/n, Esc cancel),
 **Ctrl+N** new file, **Ctrl+Esc** power down (save, show a message, deep sleep;
 press RESET to start again). Documents are Markdown files in `/documents` on the
-board's flash. The board has no clock, so a file's date is only shown once the
-time has been set (nothing sets it yet); "most recent first" uses `/recent.txt`.
+board's flash. The board has no battery-backed clock, so it sets the time over
+Wi-Fi at boot (see Settings); until then file dates are blank. "Most recent first"
+uses `/recent.txt`, not file times.
+
+## Settings (Wi-Fi time sync)
+
+Copy `config.example.txt` to `data/config.txt`, fill in your network name, password
+and timezone (a POSIX TZ string; examples are in the file), and put it on the board:
+
+```
+pio run -e typing -t uploadfs
+```
+
+At boot the typing app joins that network for a few seconds (up to ~15), sets the
+clock from the internet (NTP), and switches Wi-Fi off before Bluetooth starts. With
+the clock set, the file browser shows each file's date and unsaved text is archived
+under a date-and-time name. With no config, no network or no internet it just carries
+on with the clock unset. `data/config.txt` is git-ignored so the password is not
+committed; it is stored as plain text on the board's flash.
+
+**`uploadfs` replaces the whole file system and erases saved documents**, so do it
+before you start writing, or copy your documents off first. Files saved before the
+clock was set keep no date.
 
 ## Tests
 
@@ -76,13 +97,14 @@ the Python code from `src/` exists, the C++ is compared against it directly:
 
 - text buffer wrapping, including style markers, over thousands of random keystrokes
 - `textfmt` and Markdown conversion on thousands of random strings
-- file-name cleaning, and the battery gauge arithmetic (including its rounding)
+- file-name cleaning, the battery gauge arithmetic (including its rounding), and the
+  settings-file parser
 
 The editor (save, rename, open, new, delete, prompts, page scrolling) is checked with
 scripted sessions on a real folder, and the HID key decoder (shift, caps lock,
 rollover, key repeat) with hand-written cases. `test/render_demo.cpp` draws sample
 screens to image files for a visual check. Not covered, because it needs the
-hardware: the display driver on the panel, BLE, LittleFS, and the I2C gauge.
+hardware: the display driver on the panel, BLE, LittleFS, the I2C gauge, and Wi-Fi/NTP.
 
 ## Building
 
@@ -99,4 +121,4 @@ pairing mode the first time; after that the bond is remembered.
 ## Not planned (for now)
 
 Classic Bluetooth keyboards (the S3 is BLE only) and the Pi's cloud backup
-(Ctrl+E). Setting the clock (so file dates show) would need Wi-Fi time sync.
+(Ctrl+E).

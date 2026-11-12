@@ -1,0 +1,4 @@
+# local settings with the Wi-Fi password
+data/config.txt
+# PlatformIO build output
+.pio/

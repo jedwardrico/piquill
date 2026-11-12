@@ -150,6 +150,30 @@ int main() {
   press(ed3, KeyType::Escape, MOD_CTRL);
   CHECK(ed3.powerDownRequested());
 
+  // archived text is named by date once the clock is set
+  setenv("TZ", "UTC0", 1); tzset();
+  DocStore clocked(fs);
+  clocked.setClock([] { return (time_t)1762955101; });  // 2025-11-12 13:45:01 UTC
+  CHECK_EQ(clocked.newArchiveName(), "untitled_20251112_134501");
+  docs.saveDoc("untitled_20251112_134501", {"x"});
+  CHECK_EQ(clocked.newArchiveName(), "untitled_20251112_134501_2");
+  clocked.setClock([] { return (time_t)0; });  // clock not set: counter names again
+  CHECK(clocked.newArchiveName().rfind("untitled_", 0) == 0 && clocked.newArchiveName().find('_', 9) == std::string::npos);
+  // a file's date appears only when its time is real, and follows the timezone
+  setenv("TZ", "JST-9", 1); tzset();
+  struct FsWithTime : HostStorage {
+    using HostStorage::HostStorage;
+    std::vector<FileEntry> listDir(const std::string &d) override {
+      auto v = HostStorage::listDir(d);
+      for (auto &e : v) e.mtime = (e.name == "Second.md") ? 1762955101u : 5u;  // Second.md: real, others: unset clock
+      return v;
+    }
+  } timed(root);
+  DocStore td(timed);
+  CHECK_EQ(td.docInfo("Second").date, "2025-11-12");  // 13:45 UTC is 22:45 in Japan, still the 12th
+  CHECK_EQ(td.docInfo("untitled_1").date, "");
+  setenv("TZ", "UTC0", 1); tzset();
+
   if (fails) { printf("%d failure(s)\n", fails); return 1; }
   printf("editor: OK\n");
   return 0;

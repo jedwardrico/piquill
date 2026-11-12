@@ -10,7 +10,9 @@
 // the clock has been set.
 #pragma once
 
+#include <functional>
 #include <string>
+#include <time.h>
 #include <vector>
 
 #include "storage.h"
@@ -44,11 +46,16 @@ class DocStore {
   void rememberCurrent(const std::string &name);  // "" = none
   std::string loadCurrentName();                  // "" if none / file missing
 
-  // A free name for text that was never saved: untitled_1, untitled_2, ...
+  // The clock, used to name archived text by date. Without one (or while it is
+  // unset) names are untitled_1, untitled_2, ...
+  void setClock(std::function<time_t()> clock) { clock_ = clock; }
+  // A free name for text that was never saved: untitled_20251112_134501 when the
+  // clock is set, otherwise untitled_1, untitled_2, ...
   std::string newArchiveName();
 
  private:
   void touchRecent(const std::string &name);
   void forgetRecent(const std::string &name);
   Storage &fs_;
+  std::function<time_t()> clock_;
 };

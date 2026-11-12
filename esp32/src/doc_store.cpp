@@ -152,6 +152,16 @@ std::string DocStore::loadCurrentName() {
 }
 
 std::string DocStore::newArchiveName() {
+  time_t t = clock_ ? clock_() : 0;
+  if (t > 1700000000) {  // clock is set: name it by date and time
+    struct tm tmv;
+    localtime_r(&t, &tmv);
+    char buf[32];
+    strftime(buf, sizeof buf, "untitled_%Y%m%d_%H%M%S", &tmv);
+    std::string base = buf, name = base;
+    for (int n = 2; docExists(name); n++) name = base + "_" + std::to_string(n);
+    return name;
+  }
   for (int i = 1;; i++) {
     std::string n = "untitled_" + std::to_string(i);
     if (!docExists(n)) return n;

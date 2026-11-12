@@ -13,4 +13,6 @@ if cmp -s "$T/cpp.txt" "$T/py.txt"; then
 else
   echo "text buffer: MISMATCH"; diff "$T/cpp.txt" "$T/py.txt" | head; exit 1
 fi
+g++ -std=c++17 -Wall -I../src hid_keys_test.cpp ../src/hid_keys.cpp -o "$T/hid"
+"$T/hid"
 rm -rf "$T"

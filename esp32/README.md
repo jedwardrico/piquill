@@ -48,7 +48,8 @@ Rough order of work:
 
 1. ~~Blink / serial "hello" to confirm the toolchain and board~~ (replaced by the display test)
 2. Display driver: init, full refresh, partial refresh (written, needs hardware test)
-3. BLE keyboard to serial (needs the keyboard on hand)
+3. BLE keyboard client (written: `ble_keyboard`, `hid_keys`; the BLE part has never
+   been compiled against the real library or run with a keyboard)
 4. Text buffer, wrapping and drawing (written: `text_buffer`, `text_render`, bitmap
    font from `tools/gen_font.py`; bold/italic and the status panel not ported yet)
 5. Save/load, deep sleep, battery gauge
@@ -56,8 +57,22 @@ Rough order of work:
 
 ## Tests
 
-`test/run_tests.sh` checks on a PC that the text buffer wraps lines exactly like the
-Pi's typing logic (needs g++ and python3). It does not need the ESP32.
+`test/run_tests.sh` runs on a PC (needs g++ and python3, no ESP32): it checks that
+the text buffer wraps lines exactly like the Pi's typing logic, and that the HID
+key decoder handles shift, caps lock, rollover and key repeat correctly. The BLE
+connection code itself can only be tested with the board and keyboard.
+
+## Building
+
+```
+pio run -e display_test -t upload   # test pattern, no BLE needed
+pio run -e typing -t upload         # BLE keyboard -> text on the panel
+```
+
+First flash: hold BOOT, tap RESET, release BOOT, then upload. Watch the serial
+monitor (`pio device monitor`): the typing app prints each BLE step, including the
+HID characteristics it finds and any report sizes it ignores. Put the keyboard in
+pairing mode the first time; after that the bond is remembered.
 
 ## Not planned (for now)
 

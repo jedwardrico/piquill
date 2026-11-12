@@ -30,58 +30,81 @@ datasheet (header P2 labels, DIP switch P3). Pi pins come from `epdconfig.py`
 | GND           | -      | 6 (or 9, 14, 20, 25) | ground |
 | 3.3V          | -      | 1 (or 17)       | power |
 
-## Power button (safe on and off)
+## Power button (one button, safe on and off)
 
-A momentary push button on **GPIO3** (pin 5) turns the Pi on and shuts it down cleanly.
-GPIO3 is the only pin that can wake a halted Pi, so the button must go there.
+Power is switched by a [Pololu Mini Pushbutton Power Switch with Reverse Voltage
+Protection, LV](https://www.pololu.com/product/2808) (item 2808; 2.2-20 V, about 3 A
+continuous, 0.01 uA when off) and one **two-pole momentary push button**. Because
+the board cuts power itself, the Pi can be fully off with no standby drain.
+
+How it works:
+
+- **Press to turn on.** The button grounds the board's A pin ("on-only" wiring), so
+  the board latches on and the Pi boots. Pressing while running does not cut power.
+- **Press to turn off.** The button's second pole pulls a Pi GPIO low. The Pi shuts
+  down cleanly (PiQuill saves and shows "PiQuill Powered Down."). As the very last
+  step of the shutdown, the Pi raises its OFF pin and the board cuts power.
 
 ```
- push button            Raspberry Pi (40-pin header)
- -----------            ----------------------------
- one side   -------->   Pin 5   GPIO3
- other side -------->   Pin 14  GND  (any GND pin)
+ battery + --> charger/boost board --> 5V --> Pololu VIN
+                                             Pololu VOUT --> Pi 5V (pin 2)
+ all grounds common  (Pololu GND, Pi GND, battery -)
+
+ Pololu OFF  <-------------- Pi pin 37  GPIO26   (gpio-poweroff)
+ Pololu A    -- button pole 1 -- GND              (turn on)
+ Pi pin 13 GPIO27 -- button pole 2 -- GND         (shut down)
+ Pololu B, ON, CTRL: leave unconnected
 ```
 
-Add this line to `config.txt`:
+Add these lines to `config.txt`:
 
 ```
-dtoverlay=gpio-shutdown
+dtoverlay=gpio-shutdown,gpio_pin=27
+dtoverlay=gpio-poweroff,gpiopin=26
 ```
 
-- Press while running: the Pi shuts down. PiQuill saves your work, shows
-  "PiQuill Powered Down." and the Pi halts.
-- Press while halted: the Pi boots.
-- GPIO3 already has a pull-up on the Pi, so the button needs no resistor.
-- GPIO3 is also the hardware I2C clock pin. Do not enable `dtparam=i2c_arm=on`; the
-  battery gauge uses a software I2C bus on other pins instead (next section).
-- A halted Pi still draws a small standby current from the battery, so it will drain
-  slowly. For long storage, unplug the battery or add a hard switch in the battery lead.
-  Use a protected LiPo cell, because the Pi cannot cut its own power.
+- Use a **two-pole** momentary button (for example DPST or DPDT momentary). The
+  second pole keeps the Pi's 3.3 V GPIO away from the Pololu's A pin, whose voltage
+  the Pololu documentation does not state.
+- Do not drive CTRL: it must not be high at the same time as OFF.
+- The board latches itself, so the Pi does not need to "hold" power while it boots.
+- A press does not need to be long. Pololu warns that very bouncy buttons may not
+  work well, so use a decent tactile button.
+- The Pololu's own tactile button connects A to B, which is plain push-on/push-off.
+  Pressing it while running cuts power at once. Leave it for emergencies if the Pi
+  hangs, but remember it does not shut down cleanly.
+- If the Pi hangs and does not shut down, the button cannot turn it off. Use the
+  board's own button, or disconnect the battery.
+- Place the switch on the 5 V line (between the charger/boost board and the Pi) so
+  the battery can charge while the device is off. The charger/boost board then keeps
+  drawing its own idle current; check it for a low-current or shutdown mode if standby
+  time matters. The switch can also go in the battery lead (the LV runs from 2.2 V),
+  but then the battery cannot charge while it is off.
+- Pololu's warning applies: do not use this as an emergency cutoff or safety
+  disconnect.
+
+Test the whole sequence with a bench supply before trusting it with a battery.
 
 ## Battery gauge (MAX17048)
 
-The gauge uses a software ("bit-banged") I2C bus on GPIO5 and GPIO6, because the
-hardware I2C pins would clash with the power button. The display uses SPI, so no pins
-are shared. Add this line to `config.txt` and install the library with
-`sudo apt install python3-smbus`:
-
-```
-dtoverlay=i2c-gpio,bus=3,i2c_gpio_sda=5,i2c_gpio_scl=6
-```
+The gauge uses the Pi's normal I2C bus (GPIO2 and GPIO3). The display uses SPI, so no
+pins are shared. Enable I2C with `dtparam=i2c_arm=on` in `config.txt` (or
+`sudo raspi-config`) and install the library with `sudo apt install python3-smbus`.
 
 ```
  MAX17048 breakout      Raspberry Pi (40-pin header)
  -----------------      ----------------------------
- SDA   <------------->  Pin 29  GPIO5
- SCL   <------------->  Pin 31  GPIO6
- GND   -------------    Pin 30  GND
+ SDA   <------------->  Pin 3   GPIO2 (I2C1 SDA)
+ SCL   <------------->  Pin 5   GPIO3 (I2C1 SCL)
+ GND   -------------    Pin 9   GND
  VIN   <-------------   Pin 17  3V3
  BAT   <-------------   battery + (the cell, not the Pi's 5V rail)
 ```
 
-Pin labels differ between breakouts, so check yours. The bus needs pull-up resistors
-to 3.3V; most breakouts include them. The gauge's I2C address is 0x36. Check that the
-Pi sees it with `sudo apt install i2c-tools` then `i2cdetect -y 3`.
+Pin labels differ between breakouts, so check yours. The gauge's I2C address is
+0x36. Check that the Pi sees it with `sudo apt install i2c-tools` then
+`i2cdetect -y 1`. Connect the gauge directly to the battery, before the power switch,
+so it keeps tracking the cell while the device is off.
 
 These instructions assume a single-cell LiPo with a separate charger/boost board.
 They are untested on hardware; check polarity and your boards' pinouts before

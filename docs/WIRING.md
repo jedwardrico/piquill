@@ -30,6 +30,112 @@ datasheet (header P2 labels, DIP switch P3). Pi pins come from `epdconfig.py`
 | GND           | -      | 6 (or 9, 14, 20, 25) | ground |
 | 3.3V          | -      | 1 (or 17)       | power |
 
+## Power button (one button, safe on and off)
+
+Power is switched by a [Pololu Mini Pushbutton Power Switch with Reverse Voltage
+Protection, LV](https://www.pololu.com/product/2808) (item 2808; 2.2-20 V, about 3 A
+continuous, 0.01 uA when off) and one **two-pole momentary push button**. Because
+the board cuts power itself, the Pi can be fully off with no standby drain.
+
+How it works:
+
+- **Press to turn on.** The button grounds the board's A pin ("on-only" wiring), so
+  the board latches on and the Pi boots. Pressing while running does not cut power.
+- **Press to turn off.** The button's second pole pulls a Pi GPIO low. The Pi shuts
+  down cleanly (PiQuill saves and shows "PiQuill Powered Down."). As the very last
+  step of the shutdown, the Pi raises its OFF pin and the board cuts power.
+
+```
+ USB-C --> TP4056 module --B+/B--> 18650 cell
+              OUT+  ---------------> Pololu VIN
+                                     Pololu VOUT --> U3V40F5 VIN
+                                                     U3V40F5 VOUT --> Pi 5V (pin 2)
+ all grounds common  (TP4056 OUT-, Pololu GND, U3V40F5 GND, Pi GND)
+
+ Pololu OFF  <-------------- Pi pin 37  GPIO26   (gpio-poweroff)
+ Pololu A    -- button pole 1 -- GND              (turn on)
+ Pi pin 13 GPIO27 -- button pole 2 -- GND         (shut down)
+ Pololu B, ON, CTRL: leave unconnected
+```
+
+Add these lines to `config.txt`:
+
+```
+dtoverlay=gpio-shutdown,gpio_pin=27
+dtoverlay=gpio-poweroff,gpiopin=26
+```
+
+- Use a **two-pole** momentary button (for example DPST or DPDT momentary). The
+  second pole keeps the Pi's 3.3 V GPIO away from the Pololu's A pin, whose voltage
+  the Pololu documentation does not state.
+- Do not drive CTRL: it must not be high at the same time as OFF.
+- The board latches itself, so the Pi does not need to "hold" power while it boots.
+- A press does not need to be long. Pololu warns that very bouncy buttons may not
+  work well, so use a decent tactile button.
+- The Pololu's own tactile button connects A to B, which is plain push-on/push-off.
+  Pressing it while running cuts power at once. Leave it for emergencies if the Pi
+  hangs, but remember it does not shut down cleanly.
+- If the Pi hangs and does not shut down, the button cannot turn it off. Use the
+  board's own button, or disconnect the battery.
+- The switch sits between the TP4056's protected output (OUT+/OUT-) and the boost
+  converter. The charger is upstream of it, so the cell charges from USB-C even when
+  the device is off, and with the switch off nothing downstream draws current.
+  Use the **protected** TP4056 version (six pads: IN, OUT and B). Its OUT pads go
+  through the cell protection; the B pads connect to the cell.
+- The TP4056 is only a charger. It has no 5 V output, so a boost converter makes the
+  5 V for the Pi: a [Pololu 5V Step-Up Voltage Regulator
+  U3V40F5](https://www.pololu.com/product/4012) (item 4012). From its datasheet: fixed
+  5 V (+/-4%), 90-95% efficient, starts from 2.7 V in, and delivers roughly 2 A at 3 V
+  in and about 3 A at 4 V in, comfortably above what the Pi Zero 2 W needs.
+  - Wire VIN to the Pololu switch's VOUT, GND to ground, and VOUT to the Pi's 5 V pin
+    (pin 2). Leave EN unconnected (it has an on-board pull-up and stays enabled).
+    VIN and GND each have two pads; use one pair.
+  - Solder a 33 uF electrolytic capacitor (10 V or more, `+` to VIN) between VIN and GND
+    next to the regulator. Pololu recommends this to absorb voltage spikes when power
+    is applied.
+  - VIN must stay below the 5 V output. A single cell (at most 4.2 V) is fine.
+  - It has **no short-circuit protection and no reverse-voltage protection**. The
+    Pololu switch in front of it provides reverse-voltage protection. For shorts on the
+    5 V side, add a resettable fuse (polyfuse) of about 2 A in the 5 V lead to the Pi.
+    That fuse is my suggestion, not from Pololu's documentation.
+  - A boost converter with this design passes VIN straight through to VOUT when it is
+    off or not yet boosting. That is not a problem here, because the Pololu switch
+    removes VIN completely when the device is off.
+  - Its idle draw (under 2 mA) does not matter, because the switch removes power from it
+    when the device is off. It can get hot to the touch under load.
+- Avoid using the device while charging. The TP4056 has no power-path logic, so a load
+  on the cell keeps it from detecting the end of charge, and it can sit at 4.2 V
+  longer than is good for the cell. Charge with the device off.
+- Pololu's warning applies: do not use this as an emergency cutoff or safety
+  disconnect.
+
+Test the whole sequence with a bench supply before trusting it with a battery.
+
+## Battery gauge (MAX17048)
+
+The gauge uses the Pi's normal I2C bus (GPIO2 and GPIO3). The display uses SPI, so no
+pins are shared. Enable I2C with `dtparam=i2c_arm=on` in `config.txt` (or
+`sudo raspi-config`) and install the library with `sudo apt install python3-smbus`.
+
+```
+ MAX17048 breakout      Raspberry Pi (40-pin header)
+ -----------------      ----------------------------
+ SDA   <------------->  Pin 3   GPIO2 (I2C1 SDA)
+ SCL   <------------->  Pin 5   GPIO3 (I2C1 SCL)
+ GND   -------------    Pin 9   GND
+ VIN   <-------------   Pin 17  3V3
+ BAT   <-------------   battery + (the cell side, not the Pi's 5V rail)
+```
+
+Pin labels differ between breakouts, so check yours. The gauge's I2C address is
+0x36. Check that the Pi sees it with `sudo apt install i2c-tools` then
+`i2cdetect -y 1`. Connect the gauge directly to the battery, before the power switch,
+so it keeps tracking the cell while the device is off (use the TP4056's OUT+ pad, or B+).
+
+These instructions assume a TP4056 charger module with protection, a single 18650 cell
+and a Pololu U3V40F5 boost regulator. They are untested on hardware; check polarity and your boards' pinouts before
+connecting a battery.
+
 ## Board settings
 
 - **DIP switch P3 must be set to 2.2** (the SSD series position). The DESPI-C02

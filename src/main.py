@@ -18,6 +18,7 @@ import keyboard
 import keymaps
 import textfmt
 import cloud
+import battery
 from PIL import Image, ImageDraw, ImageFont
 from waveshare_epd import epd5in76
 import textwrap
@@ -67,6 +68,13 @@ FULL_REFRESH_AFTER = int(os.environ.get('ZW_FULL_REFRESH_AFTER', 60))
 # screen. Try e.g. ZW_STRIP_ROWS=300 for more contrast.
 INPUT_STRIP_ROWS = int(os.environ.get('ZW_STRIP_ROWS', 240))
 INPUT_STRIP_REPEAT = int(os.environ.get('ZW_STRIP_REPEAT', 1))
+# Battery (MAX17048 on I2C). Below WARN the panel shows "LOW"; at or below
+# SHUTDOWN (and not charging) the work is saved and the Pi powers itself off.
+LOW_BATTERY_WARN = int(os.environ.get('ZW_BATTERY_WARN', 15))
+LOW_BATTERY_SHUTDOWN = int(os.environ.get('ZW_BATTERY_SHUTDOWN', 5))
+gauge = battery.Battery()
+gauge.start()
+low_battery_shown = False
 last_display_update = time.time()
 # (input_content, cursor_position) as last drawn on the screen; None = the
 # input line is not currently drawn. Used to redraw whenever the text has
@@ -83,6 +91,7 @@ display_updating = False
 shift_active = False
 control_active = False
 exit_cleanup = False
+shutting_down = False  # set when the OS asks us to stop (power button)
 console_message = ""
 scrollindex=1
 
@@ -227,6 +236,15 @@ def with_display_lock(fn):
 def draw_centered(cx, y, text, font):
     display_draw.text((cx - font.getlength(text) / 2, y), text, font=font, fill=0)
 
+def battery_label():
+    """Text for the panel, e.g. "Bat 87%+" (charging) or "LOW 12%"; "" with no gauge."""
+    pct = gauge.percent
+    if pct is None:
+        return ""
+    if gauge.charging:
+        return f"Bat {pct}%+"
+    return f"LOW {pct}%" if pct <= LOW_BATTERY_WARN else f"Bat {pct}%"
+
 def draw_status():
     """Bottom panel: page bar, divider, session time / words / characters, file name."""
     display_draw.rectangle((0, PANEL_Y, SCREEN_W, SCREEN_H), fill=255)
@@ -263,6 +281,11 @@ def draw_status():
     if len(name) > MAX_NAME_LEN:
         name = name[:MAX_NAME_LEN - 1] + "~"
     draw_centered(SCREEN_W / 2, label_y + 20, name, font_name)
+
+    # battery, bottom right
+    label = battery_label()
+    if label:
+        display_draw.text((SCREEN_W - 10 - font_small.getlength(label), label_y + 28), label, font=font_small, fill=0)
 
 def draw_browser():
     visible = lines_on_screen - 2
@@ -559,6 +582,34 @@ def console_message_set(msg):
     global console_message
     console_message = msg
 
+def show_shutdown_message(msg):
+    display_draw.rectangle((0, 0, SCREEN_W, SCREEN_H), fill=255)  # Clear display
+    display_draw.text(((SCREEN_W - font24.getlength(msg)) // 2, SCREEN_H // 2), msg, font=font24, fill=0)
+    epd.display(epd.getbuffer(display_image))
+
+def power_down(msg):
+    """Save the work, show a message on the screen and power the Pi off."""
+    save_current_doc()
+    show_shutdown_message(msg)
+    time.sleep(3)
+    os.sync()
+    subprocess.run(['sudo', 'poweroff', '-f'])
+
+def check_battery():
+    """Warn once when the battery runs low; power off before it runs out."""
+    global low_battery_shown, needs_display_update
+    pct = gauge.percent
+    if pct is None or gauge.charging:
+        low_battery_shown = False
+        return
+    if pct <= LOW_BATTERY_SHUTDOWN:
+        power_down("Battery low. Powered Down.")
+    elif pct <= LOW_BATTERY_WARN and not low_battery_shown:
+        low_battery_shown = True
+        needs_display_update = True   # redraw the panel so "LOW" appears
+    elif pct > LOW_BATTERY_WARN:
+        low_battery_shown = False
+
 def handle_key_down(e): #keys being held, ie modifier keys
     global shift_active
     global control_active
@@ -664,22 +715,10 @@ def handle_key_press(e):
             scrollindex = total_pages()
        update_display()
 
-    #powerdown - could add an autosleep if you want to save battery
+    #powerdown
     if e.name == "esc" and control_active: #ctrl+esc
-        #run powerdown script
-        display_draw.rectangle((0, 0, SCREEN_W, SCREEN_H), fill=255)  # Clear display
-        msg = "PiQuill Powered Down."
-        display_draw.text(((SCREEN_W - font24.getlength(msg)) // 2, SCREEN_H // 2), msg, font=font24, fill=0)
-        partial_buffer = epd.getbuffer(display_image)
-        epd.display(partial_buffer)
-        time.sleep(3)
-        subprocess.run(['sudo', 'poweroff', '-f'])
-        
-        needs_display_update = True
-        needs_input_update = True
-        input_catchup = True
-        
-        
+        power_down("PiQuill Powered Down.")
+
     if e.name == "tab": 
         #just using two spaces for tab, kind of cheating, whatever.
         insert_character(" ")
@@ -769,6 +808,13 @@ def handle_key_press(e):
     input_catchup==True
     needs_input_update = True
     
+def handle_terminate(signum, frame):
+    """The power button (and `shutdown`) make the OS send SIGTERM: stop the main loop
+    and let the cleanup at the bottom save the work and show the shutdown message."""
+    global exit_cleanup, shutting_down
+    shutting_down = True
+    exit_cleanup = True
+
 def handle_interrupt(signal, frame):
     keyboard.unhook_all()
     epd.init()
@@ -780,6 +826,7 @@ def handle_interrupt(signal, frame):
 keyboard.on_press(handle_key_down, suppress=False) #handles modifiers and shortcuts
 keyboard.on_release(handle_key_press, suppress=True)
 signal.signal(signal.SIGINT, handle_interrupt)
+signal.signal(signal.SIGTERM, handle_terminate)
 
 #init_display routine
 epd.init()
@@ -808,6 +855,7 @@ try:
             #redraw the input line whenever the text differs from what is on screen.
             #(the old "within 0.5s of the last key" rule dropped letters typed during a slow update)
             update_input_area()
+        check_battery()
         time.sleep(0.02) # keeps the main loop from hogging the CPU (and starving the keyboard thread)
         
 except KeyboardInterrupt:
@@ -815,7 +863,16 @@ except KeyboardInterrupt:
 
 finally:
     keyboard.unhook_all()
-    epd.init()
-    time.sleep(1)
-    epd.Clear()
-    epd.sleep()
+    if shutting_down:
+        # wait (briefly) for any screen update in progress, then save and say goodbye
+        deadline = time.time() + 5
+        while (display_updating or updating_input_area) and time.time() < deadline:
+            time.sleep(0.05)
+        save_current_doc()
+        show_shutdown_message("PiQuill Powered Down.")
+        epd.sleep()
+    else:
+        epd.init()
+        time.sleep(1)
+        epd.Clear()
+        epd.sleep()

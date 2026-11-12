@@ -24,8 +24,8 @@ so this is a fresh firmware project that happens to drive the same panel. The go
 
 - Unexpected Maker FeatherS3[D] (16 MB flash, 8 MB PSRAM)
 - Good Display GDEH0576T81 panel + DESPI-C02 adapter (DIP switch P3 = 2.2), same as the Pi build
-- Keychron B1 Pro keyboard over Bluetooth LE (to be confirmed; USB host with a 5 V
-  boost converter is the fallback)
+- Keychron B1 Pro keyboard over Bluetooth LE (seen in a BLE scan; USB host with a
+  5 V boost converter is the fallback)
 - LiPo cell on the Feather's JST connector
 
 Wiring and open questions: [docs/WIRING.md](docs/WIRING.md).

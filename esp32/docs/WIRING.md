@@ -45,10 +45,10 @@ make sure the signal pins are not left driving an unpowered panel in sleep.
 S3 supports, so there is no keyboard wiring at all: no boost converter, no USB
 data wires, and the USB-C port stays free for flashing and serial.
 
-**Not yet confirmed.** Before relying on this, put the keyboard in Bluetooth
-pairing mode and check it shows up in a BLE scanner app (nRF Connect, LightBlue)
-with a "Human Interface Device" service. The S3 has no Bluetooth Classic, so a
-Classic-only keyboard would not work.
+**Confirmed:** the B1 Pro shows up in nRF Connect in pairing mode, so it
+advertises over BLE. Still to check on the device: that it exposes the "Human
+Interface Device" service (0x1812) and which address type and pairing method it
+uses. The S3 has no Bluetooth Classic, so a Classic-only keyboard would not work.
 
 Notes for the BLE route:
 

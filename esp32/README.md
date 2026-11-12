@@ -34,8 +34,8 @@ Wiring and open questions: [docs/WIRING.md](docs/WIRING.md).
 
 - Toolchain: PlatformIO with the Arduino-ESP32 framework on the pioarduino
   platform (`platformio.ini`).
-  CircuitPython is not used because the ESP32-S3 USB host support it needs for a
-  keyboard is the main risk, and ESP-IDF/Arduino have working USB host HID.
+  CircuitPython is not used: the display driver and the BLE/USB keyboard code
+  are more practical in C++, and Arduino-ESP32 has NimBLE and USB host support.
 - Display driver: port of `src/waveshare_epd/epd5in76.py` (itself a port of Good
   Display's Arduino demo) to C++ on the ESP32 SPI peripheral.
 - Rendering: 920x680 1-bit framebuffer (~78 KB) in PSRAM or internal RAM, bitmap

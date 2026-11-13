@@ -9,7 +9,7 @@
 .spi{stroke:#1f6fd1} .pwr{stroke:#d1322a} .gnd{stroke:#222} .ctl{stroke:#e08a00}
 .dot{fill:#1b252d} .part{fill:#fff;stroke:#33414d;stroke-width:2}
 </style>
-<text x="20" y="32" class="h" style="font-size:19px" text-anchor="start">PiQuill FeatherS3 wiring: Power button only (keyboard over BLE, no keyboard wiring)</text>
+<text x="20" y="32" class="h" style="font-size:19px" text-anchor="start">PiQuill FeatherS3 wiring: Power button only (keyboard wired straight to the pack, always powered)</text>
 <text x="20" y="52" class="s" text-anchor="start">All grounds common to Feather GND. Draft, untested. GPIO5 is a placeholder: use any free RTC GPIO (0-21) that is on the header and not strapping/USB. Check battery polarity first.</text>
 <g transform="translate(900,90)"><text x="0" y="0" class="h" text-anchor="start">Legend</text>
 <line class="w spi" x1="0" y1="18" x2="36" y2="18"/><text x="46" y="22" class="t" text-anchor="start">Display signals</text>
@@ -79,10 +79,14 @@
 <polyline class="w gnd" points="570,650 570,560"/>
 <text x="578" y="610" class="s" text-anchor="start">- (JST)</text>
 <text x="530" y="552" class="s" text-anchor="middle">JST PH battery connector</text>
-<rect class="box" x="760" y="420" width="300" height="110" rx="8"/><text x="910.0" y="450" class="h" text-anchor="middle">Keychron B1 Pro</text>
-<text x="910.0" y="472" class="s" text-anchor="middle">Own battery fitted, no wires to</text>
-<text x="910.0" y="488" class="s" text-anchor="middle">the Feather. Pairs over BLE</text>
-<text x="910.0" y="504" class="s" text-anchor="middle">(wireless).</text>
-<text x="910.0" y="524" class="s" text-anchor="middle">Sleep/wake of keyboard: its own.</text>
-<text x="20" y="768" class="s" text-anchor="start">Deep sleep: button wakes via ext0 (active low). Long press (about 2 s) = power down. Keyboard keeps its own battery and power switch.</text>
+<text x="630" y="334" class="t" text-anchor="end">BAT (= battery +)</text>
+<polyline class="w pwr" points="640,330 985,330 985,446 1010,446"/>
+<rect class="box" x="1010" y="380" width="170" height="190" rx="8"/><text x="1095.0" y="406" class="h" text-anchor="middle">Keychron B1 Pro</text>
+<text x="1095.0" y="426" class="s" text-anchor="middle">internal cell REMOVED</text>
+<text x="1018" y="450" class="t" text-anchor="start">BAT+ pad</text>
+<text x="1018" y="530" class="t" text-anchor="start">BAT- pad</text>
+<polyline class="w gnd" points="1010,526 990,526 990,540"/>
+<line class="w gnd" x1="990" y1="540" x2="990" y2="548"/><line class="w gnd" x1="976" y1="548" x2="1004" y2="548"/><line class="w gnd" x1="981" y1="554" x2="999" y2="554"/><line class="w gnd" x1="986" y1="560" x2="994" y2="560"/>
+<text x="1095.0" y="556" class="s" text-anchor="middle">BLE wireless; USB-C unused</text>
+<text x="20" y="768" class="s" text-anchor="start">Deep sleep: button wakes via ext0 (active low). Long press (about 2 s) = power down. Keyboard has no switch, so it stays powered in sleep.</text>
 </svg>

@@ -1,0 +1,19 @@
+# PiQuill ESP32 settings. Copy this file to data/config.txt and edit it, then put
+# it on the board with:  pio run -e typing -t uploadfs
+# (data/config.txt is ignored by git so your Wi-Fi password is not committed.)
+#
+# WARNING: uploadfs replaces the board's whole file system, which also erases the
+# documents saved on it. Do it before you start writing, or copy your documents off first.
+
+# Wi-Fi is only used for a few seconds at boot to set the clock, then switched off.
+wifi_ssid=YourNetworkName
+wifi_password=YourPassword
+
+# Timezone as a POSIX TZ string. Pick yours, or look yours up ("posix tz string <city>"):
+#   UTC0
+#   EST5EDT,M3.2.0,M11.1.0          US Eastern        CST6CDT,M3.2.0,M11.1.0   US Central
+#   MST7MDT,M3.2.0,M11.1.0          US Mountain       PST8PDT,M3.2.0,M11.1.0   US Pacific
+#   GMT0BST,M3.5.0/1,M10.5.0        UK                CET-1CEST,M3.5.0,M10.5.0/3   Central Europe
+#   IST-5:30                        India             JST-9                    Japan
+#   AEST-10AEDT,M10.1.0,M4.1.0/3    Sydney
+timezone=UTC0

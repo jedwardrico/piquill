@@ -26,4 +26,6 @@
 
 // Gate of the low-side N-FET that switches the keyboard's ground return (header
 // "6"). High = keyboard on, low = off. Needs a 100 k pull-down gate to GND.
-#define KEYBOARD_EN_PIN 6
+// Set to -1 if the keyboard is wired straight to the pack (always powered, quicker
+// to reconnect, but it drains the battery in sleep): nothing then touches the pin.
+#define KEYBOARD_EN_PIN -1

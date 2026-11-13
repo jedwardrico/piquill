@@ -98,13 +98,16 @@ powered) and `wiring-button-keyboard-switch.svg` (keyboard switched off in sleep
 - Button: GPIO `POWER_BUTTON_PIN` (placeholder 5, must be RTC-capable, 0-21) to GND,
   with a 10 k pull-up to 3V3. No capacitor: debounced in software
   (`power_button.h`, tested in `test/power_button_test.cpp`).
-- Keyboard (cell removed): BAT+ pad to the pack's positive. BAT- pad to the drain of a
+- Keyboard (cell removed), switched version: BAT+ pad to the pack's positive. BAT- pad to the drain of a
   logic-level N-FET (AO3400, IRLML6344, Si2302), source to GND, gate to
   `KEYBOARD_EN_PIN` (GPIO6) with a 100 k gate-to-GND pull-down. GPIO6 is driven low and
   held through deep sleep. The keyboard's ground floats when off, so give it no other
   wires to the Feather.
 - Wake: ext0 (active low). After a wake the button must stay down 300 ms, otherwise
   the board goes back to sleep. Not compiled or tried on hardware yet.
+- Always-powered version (no FET): BAT+ pad to the pack's positive, BAT- pad to GND, and
+  `KEYBOARD_EN_PIN` set to -1 (the current default). Quicker to reconnect after a wake,
+  but the keyboard draws from the pack during deep sleep.
 
 ## Flashing
 

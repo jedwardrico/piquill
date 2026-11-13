@@ -51,6 +51,7 @@ static bool buttonDown() { return digitalRead(POWER_BUTTON_PIN) == LOW; }
 // Switch the keyboard's supply (low-side N-FET gate). Off is held through deep
 // sleep so the gate stays low and the keyboard draws nothing.
 static void keyboardPower(bool on) {
+  if (KEYBOARD_EN_PIN < 0) return;  // keyboard wired straight to the pack
   gpio_hold_dis((gpio_num_t)KEYBOARD_EN_PIN);
   pinMode(KEYBOARD_EN_PIN, OUTPUT);
   digitalWrite(KEYBOARD_EN_PIN, on ? HIGH : LOW);

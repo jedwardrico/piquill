@@ -18,7 +18,7 @@ The Pi version is Python on Linux. None of that carries over to a microcontrolle
 so this is a fresh firmware project that happens to drive the same panel. The goals:
 
 - Hours-to-weeks battery life (deep sleep between sessions)
-- About a second from power-on to typing
+- Goal: a second or two from a button press to typing (not measured yet)
 - Fewer parts (the Feather has its own LiPo charger and fuel gauge)
 
 ## Hardware

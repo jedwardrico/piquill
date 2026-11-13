@@ -56,6 +56,15 @@ class EPD5in76 {
   // Pick the waveform temperature code (same thresholds as the demo).
   void setTemperature(int celsius);
 
+  // Read the panel's temperature sensor (command 0x40, as in the demo). The
+  // reply comes back on the shared SDA line, so MOSI is briefly bit-banged as
+  // an input. Returns degrees C (signed). Call between init commands only.
+  int readTemperature();
+  // When true (default) init() reads the sensor and picks the waveform from
+  // it; when false it uses the code from setTemperature() (default 20-30 C).
+  bool useTempSensor = true;
+  int lastTemperature() const { return lastTemp_; }
+
   // Orientation fix-ups, same meaning as the Python driver.
   bool flipX = false;
   bool flipY = true;
@@ -92,5 +101,6 @@ class EPD5in76 {
   bool partial_ = false;
   uint8_t temperatureCode_ = 241;      // register 0xE6, 20-30 C
   uint16_t partialCount_ = 0;
+  int lastTemp_ = 25;
   uint16_t spread_[256];
 };

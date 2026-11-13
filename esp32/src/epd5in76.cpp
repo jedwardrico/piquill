@@ -117,6 +117,35 @@ void EPD5in76::setTemperature(int celsius) {
   else temperatureCode_ = 244;
 }
 
+int EPD5in76::readTemperature() {
+  sendCommand(0x40);
+  readBusy();  // wait for the panel to release the sensor value
+
+  // Take the pins away from the SPI peripheral and clock 8 bits in by hand.
+  spi_.end();
+  pinMode(SCK, OUTPUT);
+  pinMode(MOSI, INPUT);  // SDA turns around to panel -> MCU
+  digitalWrite(SCK, LOW);
+  digitalWrite(dc_, HIGH);
+  digitalWrite(cs_, LOW);
+  uint8_t v = 0;
+  for (int i = 0; i < 8; i++) {
+    digitalWrite(SCK, LOW);
+    delayMicroseconds(2);
+    v = (v << 1) | (digitalRead(MOSI) ? 1 : 0);
+    digitalWrite(SCK, HIGH);
+    delayMicroseconds(2);
+    digitalWrite(SCK, LOW);
+  }
+  digitalWrite(cs_, HIGH);
+  pinMode(MOSI, OUTPUT);
+  spi_.begin();
+
+  // Same as the demo: 0..127 is positive, above that is negative (two's complement).
+  lastTemp_ = v > 127 ? (int)v - 256 : (int)v;
+  return lastTemp_;
+}
+
 void EPD5in76::commonInit() {
   reset();
   readBusy();
@@ -173,6 +202,11 @@ void EPD5in76::refresh() {
 
 void EPD5in76::init() {
   commonInit();
+
+  if (useTempSensor) {
+    setTemperature(readTemperature());
+    if (timing) Serial.printf("epd temperature %d C -> code %u\n", lastTemp_, temperatureCode_);
+  }
 
   // Forced temperature + load waveform from OTP
   sendCommand(0xE0);

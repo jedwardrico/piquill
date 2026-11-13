@@ -18,5 +18,12 @@
 #define EPD_RST_PIN  10  // header "10"
 #define EPD_BUSY_PIN 11  // header "11"
 
-// Enable pin for the 5 V boost converter feeding the keyboard (header "6").
-#define BOOST_EN_PIN 6
+// Power button: momentary switch to GND with a 10 k pull-up to 3V3. Must be an
+// RTC-capable GPIO (0-21 on the S3) so it can wake the board from deep sleep.
+// GPIO5 is a PLACEHOLDER: change it to the header pin you actually wire (not a
+// strapping, USB or already-used pin).
+#define POWER_BUTTON_PIN 5
+
+// Gate of the low-side N-FET that switches the keyboard's ground return (header
+// "6"). High = keyboard on, low = off. Needs a 100 k pull-down gate to GND.
+#define KEYBOARD_EN_PIN 6

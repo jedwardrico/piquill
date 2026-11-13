@@ -89,6 +89,23 @@ only reach the USB-C connector. Options, from least to most work:
 The USB-C connector is also the programming/serial port, so while a keyboard is
 using it you cannot use it for flashing or serial output.
 
+## Power button and keyboard switch
+
+One momentary button does all power tasks: press = wake, hold about 2 s = power
+down. Diagrams: `wiring-button.svg` (keyboard wired straight to the pack, always
+powered) and `wiring-button-keyboard-switch.svg` (keyboard switched off in sleep).
+
+- Button: GPIO `POWER_BUTTON_PIN` (placeholder 5, must be RTC-capable, 0-21) to GND,
+  with a 10 k pull-up to 3V3. No capacitor: debounced in software
+  (`power_button.h`, tested in `test/power_button_test.cpp`).
+- Keyboard (cell removed): BAT+ pad to the pack's positive. BAT- pad to the drain of a
+  logic-level N-FET (AO3400, IRLML6344, Si2302), source to GND, gate to
+  `KEYBOARD_EN_PIN` (GPIO6) with a 100 k gate-to-GND pull-down. GPIO6 is driven low and
+  held through deep sleep. The keyboard's ground floats when off, so give it no other
+  wires to the Feather.
+- Wake: ext0 (active low). After a wake the button must stay down 300 ms, otherwise
+  the board goes back to sleep. Not compiled or tried on hardware yet.
+
 ## Flashing
 
 - First flash: hold BOOT, tap RESET, release BOOT (download mode), then upload.

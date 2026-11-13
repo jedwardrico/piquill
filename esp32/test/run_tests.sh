@@ -35,4 +35,6 @@ python3 -I battery_ref.py < "$T/bat.txt" > "$T/bat_py.txt"
 if cmp -s "$T/bat_cpp.txt" "$T/bat_py.txt"; then echo "battery: OK"; else echo "battery: MISMATCH"; exit 1; fi
 g++ -std=c++17 -Wall -I../src settings_test.cpp ../src/settings.cpp -o "$T/set"
 "$T/set"
+g++ -std=c++17 -Wall -I../src power_button_test.cpp -o "$T/pb"
+"$T/pb"
 rm -rf "$T"

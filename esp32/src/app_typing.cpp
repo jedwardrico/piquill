@@ -131,7 +131,6 @@ static Redraw checkBattery() {
 
 void setup() {
   Serial.begin(115200);
-  delay(500);
   Serial.println("PiQuill ESP32 typing app");
 
   pinMode(POWER_BUTTON_PIN, INPUT);  // external 10 k pull-up to 3V3
@@ -144,11 +143,23 @@ void setup() {
     Serial.println("Could not allocate frame buffers");
     while (true) delay(1000);
   }
-  epd.init();
-  epd.clear();
-  epd.initPartial();
-
   if (!fs.begin()) Serial.println("Could not start the file system: nothing will be saved");
+
+  // Timezone, and the clock over Wi-Fi if it is not set yet. The clock survives
+  // deep sleep, so after a button wake this returns at once; the Wi-Fi join (up
+  // to ~15 s) only happens on a cold boot. Wi-Fi must be off before BLE starts:
+  // they share the radio.
+  std::string cfg;
+  Settings settings;
+  if (fs.readFile("/config.txt", cfg)) settings = parseSettings(cfg);
+  else Serial.println("No /config.txt: clock will not be set (see config.example.txt)");
+  syncTime(settings);
+
+  // Start looking for the keyboard now so the scan overlaps the display refresh below.
+  ble.begin(KEYBOARD_NAME);
+  ble.loop();
+
+  epd.init();
   battery.begin();
   docs.setClock([] { return time(nullptr); });
   editor.begin();
@@ -159,17 +170,11 @@ void setup() {
   if (battery.present() && !battery.charging() && battery.percent() <= LOW_BATTERY_SHUTDOWN)
     powerDown("Battery low. Powered Down.");
 
-  redraw(Redraw::Display);
-
-  // Set the clock over Wi-Fi if /config.txt has a network (blocks up to ~15 s),
-  // then turn Wi-Fi off before BLE starts: they share the radio.
-  std::string cfg;
-  Settings settings;
-  if (fs.readFile("/config.txt", cfg)) settings = parseSettings(cfg);
-  else Serial.println("No /config.txt: clock will not be set (see config.example.txt)");
-  syncTime(settings);
-
-  ble.begin(KEYBOARD_NAME);
+  // One full refresh both clears whatever the panel still shows (the goodbye
+  // screen) and draws the document, then switch to partial updates for typing.
+  ui::renderDisplay(epd.frame(), editor, batteryInfo());
+  epd.display();
+  epd.initPartial();
 
   // If the wake press is still down, wait for release so it is not read as a long press.
   uint32_t t0 = millis();

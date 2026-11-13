@@ -139,7 +139,7 @@ void BleKeyboard::loop() {
     return;
   }
   NimBLEScan *scan = NimBLEDevice::getScan();
-  if (!scan->isScanning() && millis() - lastAttemptMs_ > 1000) {
+  if (!scan->isScanning() && (lastAttemptMs_ == 0 || millis() - lastAttemptMs_ > 1000)) {
     lastAttemptMs_ = millis();
     Serial.println("BLE: scanning...");
     scan->start(0, false, true);  // scan until stopped

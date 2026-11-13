@@ -9,7 +9,7 @@
 .spi{stroke:#1f6fd1} .pwr{stroke:#d1322a} .gnd{stroke:#222} .ctl{stroke:#e08a00}
 .dot{fill:#1b252d} .part{fill:#fff;stroke:#33414d;stroke-width:2}
 </style>
-<text x="20" y="32" class="h" style="font-size:19px" text-anchor="start">PiQuill FeatherS3 wiring: Power button + keyboard load switch (keyboard powered from the pack, data over BLE)</text>
+<text x="20" y="32" class="h" style="font-size:19px" text-anchor="start">PiQuill FeatherS3 wiring: Power button + keyboard low-side N-FET switch (data over BLE)</text>
 <text x="20" y="52" class="s" text-anchor="start">All grounds common to Feather GND. Draft, untested. GPIO5 is a placeholder: use any free RTC GPIO (0-21) that is on the header and not strapping/USB. Check battery polarity first.</text>
 <g transform="translate(900,90)"><text x="0" y="0" class="h" text-anchor="start">Legend</text>
 <line class="w spi" x1="0" y1="18" x2="36" y2="18"/><text x="46" y="22" class="t" text-anchor="start">Display signals</text>
@@ -79,30 +79,28 @@
 <polyline class="w gnd" points="570,650 570,560"/>
 <text x="578" y="610" class="s" text-anchor="start">- (JST)</text>
 <text x="530" y="552" class="s" text-anchor="middle">JST PH battery connector</text>
-<rect class="box" x="760" y="380" width="200" height="130" rx="8"/><text x="860" y="404" class="h" text-anchor="middle">Load switch IC</text>
-<text x="860" y="422" class="s" text-anchor="middle">(high side, nA off-state)</text>
-<text x="770" y="450" class="t" text-anchor="start">VIN</text>
-<text x="950" y="450" class="t" text-anchor="end">VOUT</text>
-<text x="770" y="482" class="t" text-anchor="start">EN</text>
-<text x="860" y="505" class="t" text-anchor="middle">GND</text>
-<text x="630" y="294" class="t" text-anchor="end">BAT (= battery +)</text>
-<polyline class="w pwr" points="640,290 720,290 720,446 760,446"/>
-<text x="630" y="334" class="t" text-anchor="end">GPIO6 (keyboard EN)</text>
-<polyline class="w ctl" points="640,330 700,330 700,478 760,478"/>
-<circle class="dot" cx="700" cy="478" r="4"/>
-<rect class="part" x="691" y="507.0" width="18" height="36"/><text x="716" y="529.0" class="t" text-anchor="start">100k pull-down</text>
-<polyline class="w ctl" points="700,478 700,502"/>
-<polyline class="w gnd" points="700,538 700,560"/>
-<line class="w gnd" x1="700" y1="560" x2="700" y2="568"/><line class="w gnd" x1="686" y1="568" x2="714" y2="568"/><line class="w gnd" x1="691" y1="574" x2="709" y2="574"/><line class="w gnd" x1="696" y1="580" x2="704" y2="580"/>
-<polyline class="w gnd" points="860,510 860,540"/>
-<line class="w gnd" x1="860" y1="540" x2="860" y2="548"/><line class="w gnd" x1="846" y1="548" x2="874" y2="548"/><line class="w gnd" x1="851" y1="554" x2="869" y2="554"/><line class="w gnd" x1="856" y1="560" x2="864" y2="560"/>
-<polyline class="w pwr" points="960,446 1010,446"/>
+<text x="630" y="334" class="t" text-anchor="end">BAT (= battery +)</text>
+<polyline class="w pwr" points="640,330 985,330 985,446 1010,446"/>
+<text x="630" y="374" class="t" text-anchor="end">GPIO6 (keyboard EN)</text>
+<polyline class="w ctl" points="640,370 760,370 760,610 872,610"/>
+<circle class="dot" cx="800" cy="610" r="4"/>
+<rect class="part" x="791" y="642.0" width="18" height="36"/><text x="816" y="664.0" class="t" text-anchor="start"></text>
+<text x="784" y="664" class="t" text-anchor="end">100k gate pull-down</text>
+<polyline class="w ctl" points="800,610 800,642"/>
+<polyline class="w gnd" points="800,678 800,700"/>
+<line class="w gnd" x1="800" y1="700" x2="800" y2="708"/><line class="w gnd" x1="786" y1="708" x2="814" y2="708"/><line class="w gnd" x1="791" y1="714" x2="809" y2="714"/><line class="w gnd" x1="796" y1="720" x2="804" y2="720"/>
+<line class="w gnd" x1="872" y1="582" x2="872" y2="638"/><line class="w gnd" x1="884" y1="572" x2="884" y2="648"/><polyline class="w gnd" points="884,578 900,578 900,526"/>
+<polyline class="w gnd" points="884,610 900,610"/>
+<polyline class="w gnd" points="884,642 900,642 900,676"/>
+<line class="w gnd" x1="900" y1="676" x2="900" y2="684"/><line class="w gnd" x1="886" y1="684" x2="914" y2="684"/><line class="w gnd" x1="891" y1="690" x2="909" y2="690"/><line class="w gnd" x1="896" y1="696" x2="904" y2="696"/>
+<text x="920" y="590" class="t" text-anchor="start">N-FET, logic level</text>
+<text x="920" y="606" class="s" text-anchor="start">e.g. AO3400, IRLML6344, Si2302</text>
+<text x="920" y="622" class="s" text-anchor="start">(drain to keyboard BAT-)</text>
 <rect class="box" x="1010" y="380" width="170" height="190" rx="8"/><text x="1095.0" y="406" class="h" text-anchor="middle">Keychron B1 Pro</text>
 <text x="1095.0" y="426" class="s" text-anchor="middle">internal cell REMOVED</text>
 <text x="1018" y="450" class="t" text-anchor="start">BAT+ pad</text>
 <text x="1018" y="530" class="t" text-anchor="start">BAT- pad</text>
-<polyline class="w gnd" points="1010,526 990,526 990,540"/>
-<line class="w gnd" x1="990" y1="540" x2="990" y2="548"/><line class="w gnd" x1="976" y1="548" x2="1004" y2="548"/><line class="w gnd" x1="981" y1="554" x2="999" y2="554"/><line class="w gnd" x1="986" y1="560" x2="994" y2="560"/>
+<polyline class="w gnd" points="1010,526 900,526"/>
 <text x="1095.0" y="556" class="s" text-anchor="middle">BLE wireless; USB-C unused</text>
-<text x="20" y="768" class="s" text-anchor="start">Deep sleep: GPIO6 driven low and held (gpio_hold_en + gpio_deep_sleep_hold_en); button wakes via ext0 (active low). Long press = power down.</text>
+<text x="20" y="768" class="s" text-anchor="start">Keyboard ground floats when off (no other wires to it). Deep sleep: GPIO6 driven low and held (gpio_hold_en + gpio_deep_sleep_hold_en); button wakes via ext0 (active low). Long press = power down.</text>
 </svg>

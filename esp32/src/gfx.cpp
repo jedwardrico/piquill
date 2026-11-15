@@ -64,12 +64,12 @@ int drawFormatted(uint8_t *frame, const Font &f, int x, int y, const std::string
   return x;
 }
 
-void drawCentered(uint8_t *frame, const Font &f, float cx, int y, const std::string &s) {
-  drawText(frame, f, (int)lroundf(cx - textWidth(f, s.size()) / 2.0f), y, s);
+void drawCentered(uint8_t *frame, const Font &f, float cx, int y, const std::string &s, bool bold) {
+  drawText(frame, f, (int)lroundf(cx - textWidth(f, s.size()) / 2.0f), y, s, bold);
 }
 
-void drawRightAligned(uint8_t *frame, const Font &f, int xRight, int y, const std::string &s) {
-  drawText(frame, f, xRight - textWidth(f, s.size()), y, s);
+void drawRightAligned(uint8_t *frame, const Font &f, int xRight, int y, const std::string &s, bool bold) {
+  drawText(frame, f, xRight - textWidth(f, s.size()), y, s, bold);
 }
 
 }  // namespace gfx

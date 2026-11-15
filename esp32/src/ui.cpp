@@ -11,7 +11,8 @@ using namespace gfx;
 static const Font &F_TEXT = FONT_28;    // text, input line, browser names
 static const Font &F_STATUS = FONT_20;
 static const Font &F_SMALL = FONT_18;
-static const int STATUS_BOLD = 2;  // heavy double-strike for the status panel
+static const int STATUS_BOLD = 2;  // heavy double-strike for the status numbers
+static const int LABEL_BOLD = 1;   // same as body-text bold: the status labels, one stroke lighter
 static const Font &F_BIG = FONT_32;
 static const Font &F_NAME = FONT_26;
 
@@ -53,10 +54,10 @@ static void drawStatus(uint8_t *f, const Editor &ed, const BatteryInfo &bat) {
   int sideY = valY + F_BIG.ascent - F_STATUS.ascent;  // put the side values on the same baseline as "Words:"
   float leftX = SCREEN_W * 0.17f, rightX = SCREEN_W * 0.83f;
   drawCentered(f, F_STATUS, leftX, sideY, ed.sessionTime(), STATUS_BOLD);
-  drawCentered(f, F_SMALL, leftX, labelY, "Session Time", STATUS_BOLD);
+  drawCentered(f, F_SMALL, leftX, labelY, "Session Time", LABEL_BOLD);
   drawCentered(f, F_BIG, SCREEN_W / 2.0f, valY, "Words: " + thousands(ed.text().wordCount()), STATUS_BOLD);
   drawCentered(f, F_STATUS, rightX, sideY, thousands(ed.text().charCount()), STATUS_BOLD);
-  drawCentered(f, F_SMALL, rightX, labelY, "Characters", STATUS_BOLD);
+  drawCentered(f, F_SMALL, rightX, labelY, "Characters", LABEL_BOLD);
 
   // file name
   int nameY = labelY + 20;
@@ -66,7 +67,14 @@ static void drawStatus(uint8_t *f, const Editor &ed, const BatteryInfo &bat) {
 
   // battery, bottom right
   std::string label = batteryLabel(bat);
-  if (!label.empty()) drawRightAligned(f, F_SMALL, SCREEN_W - 10, nameY + F_NAME.ascent - F_SMALL.ascent, label, STATUS_BOLD);
+  if (!label.empty()) {
+    // "Bat " / "LOW " is a label (lighter); the percentage is a number (heavy)
+    size_t sp = label.find(' ') + 1;
+    int y = nameY + F_NAME.ascent - F_SMALL.ascent;
+    int x = SCREEN_W - 10 - textWidth(F_SMALL, label.size());
+    drawText(f, F_SMALL, x, y, label.substr(0, sp), LABEL_BOLD);
+    drawText(f, F_SMALL, x + textWidth(F_SMALL, sp), y, label.substr(sp), STATUS_BOLD);
+  }
 }
 
 static void drawBrowser(uint8_t *f, const Editor &ed) {

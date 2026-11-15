@@ -233,17 +233,18 @@ def with_display_lock(fn):
             return fn(*args, **kwargs)
     return wrapper
 
-STATUS_BOLD = 2  # extra pixels each stroke is doubled to the right (heavy bold)
+STATUS_BOLD = 2  # extra pixels each stroke is doubled to the right (heavy bold): the numbers
+LABEL_BOLD = 1   # same as body-text bold: the status labels, one stroke lighter
 
 def draw_centered(cx, y, text, font, bold=0):
     x = cx - font.getlength(text) / 2
     for k in range(bold + 1):
         display_draw.text((x + k, y), text, font=font, fill=0)
 
-def draw_bold(xy, text, font):
-    """Heavy bold text for the status panel (multi-strike)."""
+def draw_bold(xy, text, font, bold=STATUS_BOLD):
+    """Bold text for the status panel (multi-strike)."""
     x, y = xy
-    for k in range(STATUS_BOLD + 1):
+    for k in range(bold + 1):
         display_draw.text((x + k, y), text, font=font, fill=0)
 
 def battery_label():
@@ -281,10 +282,10 @@ def draw_status():
     val_y, label_y = div_y + 8, div_y + 44
     left_x, right_x = SCREEN_W * 0.17, SCREEN_W * 0.83
     draw_centered(left_x, val_y + 4, session_time(), font_status, bold=STATUS_BOLD)
-    draw_centered(left_x, label_y, "Session Time", font_small, bold=STATUS_BOLD)
+    draw_centered(left_x, label_y, "Session Time", font_small, bold=LABEL_BOLD)
     draw_centered(SCREEN_W / 2, val_y, f"Words: {words:,}", font_big, bold=STATUS_BOLD)
     draw_centered(right_x, val_y + 4, f"{char_count():,}", font_status, bold=STATUS_BOLD)
-    draw_centered(right_x, label_y, "Characters", font_small, bold=STATUS_BOLD)
+    draw_centered(right_x, label_y, "Characters", font_small, bold=LABEL_BOLD)
 
     # file name
     name = current_doc if current_doc else "untitled"
@@ -295,7 +296,11 @@ def draw_status():
     # battery, bottom right
     label = battery_label()
     if label:
-        draw_bold((SCREEN_W - 10 - font_small.getlength(label), label_y + 28), label, font_small)
+        # "Bat " / "LOW " is a label (lighter); the percentage is a number (heavy)
+        head, tail = label[:label.index(' ') + 1], label[label.index(' ') + 1:]
+        lx = SCREEN_W - 10 - font_small.getlength(label)
+        draw_bold((lx, label_y + 28), head, font_small, LABEL_BOLD)
+        draw_bold((lx + font_small.getlength(head), label_y + 28), tail, font_small)
 
 def draw_browser():
     visible = lines_on_screen - 2

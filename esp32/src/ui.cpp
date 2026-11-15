@@ -11,6 +11,7 @@ using namespace gfx;
 static const Font &F_TEXT = FONT_28;    // text, input line, browser names
 static const Font &F_STATUS = FONT_20;
 static const Font &F_SMALL = FONT_18;
+static const int STATUS_BOLD = 2;  // heavy double-strike for the status panel
 static const Font &F_BIG = FONT_32;
 static const Font &F_NAME = FONT_26;
 
@@ -35,13 +36,13 @@ static void drawStatus(uint8_t *f, const Editor &ed, const BatteryInfo &bat) {
 
   // page progress bar: "Pg 2 ------[=]------ of 5"
   int rowY = PANEL_Y + 2;
-  drawText(f, F_SMALL, 10, rowY, "Pg " + std::to_string(page), true);
-  drawRightAligned(f, F_SMALL, SCREEN_W - 10, rowY, "of " + std::to_string(pages), true);
+  drawText(f, F_SMALL, 10, rowY, "Pg " + std::to_string(page), STATUS_BOLD);
+  drawRightAligned(f, F_SMALL, SCREEN_W - 10, rowY, "of " + std::to_string(pages), STATUS_BOLD);
   int x0 = 90, x1 = SCREEN_W - 90, mid = rowY + 10, markerW = 40;
   hline(f, x0, x1, mid);
   double frac = pages > 1 ? (page - 1.0) / (pages - 1) : 0;
   int mx = (int)(x0 + (x1 - x0 - markerW) * frac);
-  fillRect(f, mx, mid - 2, mx + markerW, mid + 2, true);
+  fillRect(f, mx, mid - 2, mx + markerW, mid + 2, STATUS_BOLD);
 
   // the divider between the text and the stats
   int divY = PANEL_Y + 28;
@@ -50,20 +51,20 @@ static void drawStatus(uint8_t *f, const Editor &ed, const BatteryInfo &bat) {
   // stats row
   int valY = divY + 8, labelY = divY + 44;
   float leftX = SCREEN_W * 0.17f, rightX = SCREEN_W * 0.83f;
-  drawCentered(f, F_STATUS, leftX, valY + 4, ed.sessionTime(), true);
-  drawCentered(f, F_SMALL, leftX, labelY, "Session Time", true);
-  drawCentered(f, F_BIG, SCREEN_W / 2.0f, valY, "Words: " + thousands(ed.text().wordCount()), true);
-  drawCentered(f, F_STATUS, rightX, valY + 4, thousands(ed.text().charCount()), true);
-  drawCentered(f, F_SMALL, rightX, labelY, "Characters", true);
+  drawCentered(f, F_STATUS, leftX, valY + 4, ed.sessionTime(), STATUS_BOLD);
+  drawCentered(f, F_SMALL, leftX, labelY, "Session Time", STATUS_BOLD);
+  drawCentered(f, F_BIG, SCREEN_W / 2.0f, valY, "Words: " + thousands(ed.text().wordCount()), STATUS_BOLD);
+  drawCentered(f, F_STATUS, rightX, valY + 4, thousands(ed.text().charCount()), STATUS_BOLD);
+  drawCentered(f, F_SMALL, rightX, labelY, "Characters", STATUS_BOLD);
 
   // file name
   std::string name = ed.docName().empty() ? "untitled" : ed.docName();
   if (name.size() > DocStore::MAX_NAME_LEN) name = name.substr(0, DocStore::MAX_NAME_LEN - 1) + "~";
-  drawCentered(f, F_NAME, SCREEN_W / 2.0f, labelY + 20, name, true);
+  drawCentered(f, F_NAME, SCREEN_W / 2.0f, labelY + 20, name, STATUS_BOLD);
 
   // battery, bottom right
   std::string label = batteryLabel(bat);
-  if (!label.empty()) drawRightAligned(f, F_SMALL, SCREEN_W - 10, labelY + 28, label, true);
+  if (!label.empty()) drawRightAligned(f, F_SMALL, SCREEN_W - 10, labelY + 28, label, STATUS_BOLD);
 }
 
 static void drawBrowser(uint8_t *f, const Editor &ed) {

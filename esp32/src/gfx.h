@@ -24,15 +24,17 @@ void hline(uint8_t *frame, int x0, int x1, int y, int thickness = 1);
 inline int textWidth(const Font &f, size_t nchars) { return (int)(nchars * f.w); }
 
 // One run of text in one style, top-left at (x, y). Returns its width.
-int drawRun(uint8_t *frame, const Font &f, int x, int y, const char *s, size_t n, bool bold = false,
+int drawRun(uint8_t *frame, const Font &f, int x, int y, const char *s, size_t n, int bold = 0,
             bool italic = false, bool underline = false);
+// `bold` is the number of extra pixels each stroke is doubled to the right:
+// 0 plain, 1 normal bold, 2 heavy.
 // Plain text.
-inline int drawText(uint8_t *frame, const Font &f, int x, int y, const std::string &s, bool bold = false) {
+inline int drawText(uint8_t *frame, const Font &f, int x, int y, const std::string &s, int bold = 0) {
   return drawRun(frame, f, x, y, s.data(), s.size(), bold);
 }
 // Text containing style markers, starting in `st`. Returns the x after it; `st`
 // is updated to the style at the end.
 int drawFormatted(uint8_t *frame, const Font &f, int x, int y, const std::string &s, textfmt::State &st);
-void drawCentered(uint8_t *frame, const Font &f, float cx, int y, const std::string &s, bool bold = false);
-void drawRightAligned(uint8_t *frame, const Font &f, int xRight, int y, const std::string &s, bool bold = false);
+void drawCentered(uint8_t *frame, const Font &f, float cx, int y, const std::string &s, int bold = 0);
+void drawRightAligned(uint8_t *frame, const Font &f, int xRight, int y, const std::string &s, int bold = 0);
 }  // namespace gfx

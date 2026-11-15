@@ -25,19 +25,19 @@ void hline(uint8_t *frame, int x0, int x1, int y, int thickness) {
 
 // Ink of one glyph, optionally sheared (italic) and/or doubled one pixel to the
 // right (bold). The shear leans the top of each glyph right, about the baseline.
-static void drawGlyph(uint8_t *frame, const Font &f, int x, int y, char c, bool bold, bool italic) {
+static void drawGlyph(uint8_t *frame, const Font &f, int x, int y, char c, int bold, bool italic) {
   const uint8_t *g = f.glyph(c);
   for (int row = 0; row < f.h; row++) {
     int dx = italic ? (int)lroundf(ITALIC_SLANT * (f.ascent - row)) : 0;
     for (int col = 0; col < f.w; col++) {
       if (!(g[row * f.rowBytes + (col >> 3)] & (0x80 >> (col & 7)))) continue;
       setPixel(frame, x + col + dx, y + row, true);
-      if (bold) setPixel(frame, x + col + dx + 1, y + row, true);
+      for (int k = 1; k <= bold; k++) setPixel(frame, x + col + dx + k, y + row, true);
     }
   }
 }
 
-int drawRun(uint8_t *frame, const Font &f, int x, int y, const char *s, size_t n, bool bold, bool italic,
+int drawRun(uint8_t *frame, const Font &f, int x, int y, const char *s, size_t n, int bold, bool italic,
             bool underline) {
   int width = textWidth(f, n);
   if (n == 0) return 0;
@@ -64,11 +64,11 @@ int drawFormatted(uint8_t *frame, const Font &f, int x, int y, const std::string
   return x;
 }
 
-void drawCentered(uint8_t *frame, const Font &f, float cx, int y, const std::string &s, bool bold) {
+void drawCentered(uint8_t *frame, const Font &f, float cx, int y, const std::string &s, int bold) {
   drawText(frame, f, (int)lroundf(cx - textWidth(f, s.size()) / 2.0f), y, s, bold);
 }
 
-void drawRightAligned(uint8_t *frame, const Font &f, int xRight, int y, const std::string &s, bool bold) {
+void drawRightAligned(uint8_t *frame, const Font &f, int xRight, int y, const std::string &s, int bold) {
   drawText(frame, f, xRight - textWidth(f, s.size()), y, s, bold);
 }
 

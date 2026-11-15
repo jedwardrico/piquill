@@ -233,17 +233,18 @@ def with_display_lock(fn):
             return fn(*args, **kwargs)
     return wrapper
 
-def draw_centered(cx, y, text, font, bold=False):
+STATUS_BOLD = 2  # extra pixels each stroke is doubled to the right (heavy bold)
+
+def draw_centered(cx, y, text, font, bold=0):
     x = cx - font.getlength(text) / 2
-    display_draw.text((x, y), text, font=font, fill=0)
-    if bold:
-        display_draw.text((x + 1, y), text, font=font, fill=0)
+    for k in range(bold + 1):
+        display_draw.text((x + k, y), text, font=font, fill=0)
 
 def draw_bold(xy, text, font):
-    """Bold text for the status panel (double-strike, same as textfmt)."""
+    """Heavy bold text for the status panel (multi-strike)."""
     x, y = xy
-    display_draw.text((x, y), text, font=font, fill=0)
-    display_draw.text((x + 1, y), text, font=font, fill=0)
+    for k in range(STATUS_BOLD + 1):
+        display_draw.text((x + k, y), text, font=font, fill=0)
 
 def battery_label():
     """Text for the panel, e.g. "Bat 87%+" (charging) or "LOW 12%"; "" with no gauge."""
@@ -279,17 +280,17 @@ def draw_status():
     words = word_count()
     val_y, label_y = div_y + 8, div_y + 44
     left_x, right_x = SCREEN_W * 0.17, SCREEN_W * 0.83
-    draw_centered(left_x, val_y + 4, session_time(), font_status, bold=True)
-    draw_centered(left_x, label_y, "Session Time", font_small, bold=True)
-    draw_centered(SCREEN_W / 2, val_y, f"Words: {words:,}", font_big, bold=True)
-    draw_centered(right_x, val_y + 4, f"{char_count():,}", font_status, bold=True)
-    draw_centered(right_x, label_y, "Characters", font_small, bold=True)
+    draw_centered(left_x, val_y + 4, session_time(), font_status, bold=STATUS_BOLD)
+    draw_centered(left_x, label_y, "Session Time", font_small, bold=STATUS_BOLD)
+    draw_centered(SCREEN_W / 2, val_y, f"Words: {words:,}", font_big, bold=STATUS_BOLD)
+    draw_centered(right_x, val_y + 4, f"{char_count():,}", font_status, bold=STATUS_BOLD)
+    draw_centered(right_x, label_y, "Characters", font_small, bold=STATUS_BOLD)
 
     # file name
     name = current_doc if current_doc else "untitled"
     if len(name) > MAX_NAME_LEN:
         name = name[:MAX_NAME_LEN - 1] + "~"
-    draw_centered(SCREEN_W / 2, label_y + 20, name, font_name, bold=True)
+    draw_centered(SCREEN_W / 2, label_y + 20, name, font_name, bold=STATUS_BOLD)
 
     # battery, bottom right
     label = battery_label()

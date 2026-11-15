@@ -233,8 +233,19 @@ def with_display_lock(fn):
             return fn(*args, **kwargs)
     return wrapper
 
-def draw_centered(cx, y, text, font):
-    display_draw.text((cx - font.getlength(text) / 2, y), text, font=font, fill=0)
+STATUS_BOLD = 2  # extra pixels each stroke is doubled to the right (heavy bold): the numbers
+LABEL_BOLD = 1   # same as body-text bold: the status labels, one stroke lighter
+
+def draw_centered(cx, y, text, font, bold=0):
+    x = cx - font.getlength(text) / 2
+    for k in range(bold + 1):
+        display_draw.text((x + k, y), text, font=font, fill=0)
+
+def draw_bold(xy, text, font, bold=STATUS_BOLD):
+    """Bold text for the status panel (multi-strike)."""
+    x, y = xy
+    for k in range(bold + 1):
+        display_draw.text((x + k, y), text, font=font, fill=0)
 
 def battery_label():
     """Text for the panel, e.g. "Bat 87%+" (charging) or "LOW 12%"; "" with no gauge."""
@@ -253,8 +264,8 @@ def draw_status():
     # page progress bar: "Pg 2 ------[=]------ of 5"
     row_y = PANEL_Y + 2
     left, right = f"Pg {page}", f"of {pages}"
-    display_draw.text((10, row_y), left, font=font_small, fill=0)
-    display_draw.text((SCREEN_W - 10 - font_small.getlength(right), row_y), right, font=font_small, fill=0)
+    draw_bold((10, row_y), left, font_small)
+    draw_bold((SCREEN_W - 10 - font_small.getlength(right), row_y), right, font_small)
     x0, x1, mid = 90, SCREEN_W - 90, row_y + 10
     display_draw.line((x0, mid, x1, mid), fill=0)
     marker_w = 40
@@ -270,22 +281,22 @@ def draw_status():
     words = word_count()
     val_y, label_y = div_y + 8, div_y + 44
     left_x, right_x = SCREEN_W * 0.17, SCREEN_W * 0.83
-    draw_centered(left_x, val_y + 4, session_time(), font_status)
-    draw_centered(left_x, label_y, "Session Time", font_small)
-    draw_centered(SCREEN_W / 2, val_y, f"Words: {words:,}", font_big)
-    draw_centered(right_x, val_y + 4, f"{char_count():,}", font_status)
-    draw_centered(right_x, label_y, "Characters", font_small)
+    draw_centered(left_x, val_y + 4, session_time(), font_status, bold=STATUS_BOLD)
+    draw_centered(left_x, label_y, "Session Time", font_small, bold=LABEL_BOLD)
+    draw_centered(SCREEN_W / 2, val_y, f"Words: {words:,}", font_big, bold=STATUS_BOLD)
+    draw_centered(right_x, val_y + 4, f"{char_count():,}", font_status, bold=STATUS_BOLD)
+    draw_centered(right_x, label_y, "Characters", font_small, bold=LABEL_BOLD)
 
     # file name
     name = current_doc if current_doc else "untitled"
     if len(name) > MAX_NAME_LEN:
         name = name[:MAX_NAME_LEN - 1] + "~"
-    draw_centered(SCREEN_W / 2, label_y + 20, name, font_name)
+    draw_centered(SCREEN_W / 2, label_y + 20, name, font_name, bold=STATUS_BOLD)
 
     # battery, bottom right
     label = battery_label()
     if label:
-        display_draw.text((SCREEN_W - 10 - font_small.getlength(label), label_y + 28), label, font=font_small, fill=0)
+        draw_bold((SCREEN_W - 10 - font_small.getlength(label), label_y + 28), label, font_small, LABEL_BOLD)
 
 def draw_browser():
     visible = lines_on_screen - 2

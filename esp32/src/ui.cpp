@@ -50,21 +50,23 @@ static void drawStatus(uint8_t *f, const Editor &ed, const BatteryInfo &bat) {
 
   // stats row
   int valY = divY + 8, labelY = divY + 44;
+  int sideY = valY + F_BIG.ascent - F_STATUS.ascent;  // put the side values on the same baseline as "Words:"
   float leftX = SCREEN_W * 0.17f, rightX = SCREEN_W * 0.83f;
-  drawCentered(f, F_STATUS, leftX, valY + 4, ed.sessionTime(), STATUS_BOLD);
+  drawCentered(f, F_STATUS, leftX, sideY, ed.sessionTime(), STATUS_BOLD);
   drawCentered(f, F_SMALL, leftX, labelY, "Session Time", STATUS_BOLD);
   drawCentered(f, F_BIG, SCREEN_W / 2.0f, valY, "Words: " + thousands(ed.text().wordCount()), STATUS_BOLD);
-  drawCentered(f, F_STATUS, rightX, valY + 4, thousands(ed.text().charCount()), STATUS_BOLD);
+  drawCentered(f, F_STATUS, rightX, sideY, thousands(ed.text().charCount()), STATUS_BOLD);
   drawCentered(f, F_SMALL, rightX, labelY, "Characters", STATUS_BOLD);
 
   // file name
+  int nameY = labelY + 20;
   std::string name = ed.docName().empty() ? "untitled" : ed.docName();
   if (name.size() > DocStore::MAX_NAME_LEN) name = name.substr(0, DocStore::MAX_NAME_LEN - 1) + "~";
-  drawCentered(f, F_NAME, SCREEN_W / 2.0f, labelY + 20, name, STATUS_BOLD);
+  drawCentered(f, F_NAME, SCREEN_W / 2.0f, nameY, name, STATUS_BOLD);
 
   // battery, bottom right
   std::string label = batteryLabel(bat);
-  if (!label.empty()) drawRightAligned(f, F_SMALL, SCREEN_W - 10, labelY + 28, label, STATUS_BOLD);
+  if (!label.empty()) drawRightAligned(f, F_SMALL, SCREEN_W - 10, nameY + F_NAME.ascent - F_SMALL.ascent, label, STATUS_BOLD);
 }
 
 static void drawBrowser(uint8_t *f, const Editor &ed) {

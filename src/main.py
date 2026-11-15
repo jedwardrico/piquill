@@ -296,11 +296,7 @@ def draw_status():
     # battery, bottom right
     label = battery_label()
     if label:
-        # "Bat " / "LOW " is a label (lighter); the percentage is a number (heavy)
-        head, tail = label[:label.index(' ') + 1], label[label.index(' ') + 1:]
-        lx = SCREEN_W - 10 - font_small.getlength(label)
-        draw_bold((lx, label_y + 28), head, font_small, LABEL_BOLD)
-        draw_bold((lx + font_small.getlength(head), label_y + 28), tail, font_small)
+        draw_bold((SCREEN_W - 10 - font_small.getlength(label), label_y + 28), label, font_small, LABEL_BOLD)
 
 def draw_browser():
     visible = lines_on_screen - 2

@@ -67,14 +67,7 @@ static void drawStatus(uint8_t *f, const Editor &ed, const BatteryInfo &bat) {
 
   // battery, bottom right
   std::string label = batteryLabel(bat);
-  if (!label.empty()) {
-    // "Bat " / "LOW " is a label (lighter); the percentage is a number (heavy)
-    size_t sp = label.find(' ') + 1;
-    int y = nameY + F_NAME.ascent - F_SMALL.ascent;
-    int x = SCREEN_W - 10 - textWidth(F_SMALL, label.size());
-    drawText(f, F_SMALL, x, y, label.substr(0, sp), LABEL_BOLD);
-    drawText(f, F_SMALL, x + textWidth(F_SMALL, sp), y, label.substr(sp), STATUS_BOLD);
-  }
+  if (!label.empty()) drawRightAligned(f, F_SMALL, SCREEN_W - 10, nameY + F_NAME.ascent - F_SMALL.ascent, label, LABEL_BOLD);
 }
 
 static void drawBrowser(uint8_t *f, const Editor &ed) {

@@ -31,8 +31,12 @@ for size in SIZES:
     rb = math.ceil(w / 8)
     glyphs = []
     for code in range(32, 127):
-        big = Image.new('1', (w + 12, h + 12), 1)
+        # Antialiased render, then threshold at 50%: PIL's 1-bit mode hints glyphs
+        # onto the pixel grid and can drop a thin row (e.g. the foot of a '1'),
+        # which put glyphs on different baselines.
+        big = Image.new('L', (w + 12, h + 12), 255)
         ImageDraw.Draw(big).text((0, 0), chr(code), font=font, fill=0)
+        big = big.point(lambda v: 0 if v < 128 else 255)
         px = big.load()
         for y in range(big.size[1]):
             for x in range(w, big.size[0]):

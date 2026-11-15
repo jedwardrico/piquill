@@ -1,4 +1,5 @@
-// Draws the Editor's state into a frame: 14 text lines, the input line, then the status panel (page bar, session time, word and
+// Draws the Editor's state into a frame, laid out like the Pi version: 14 text
+// lines, the input line, then the status panel (page bar, session time, word and
 // character counts, file name, battery). Pure drawing: no Arduino calls.
 #pragma once
 
@@ -18,14 +19,7 @@ constexpr int MARGIN_X = 10;
 constexpr int LINE_H = 36;
 constexpr int TEXT_TOP = 4;
 constexpr int INPUT_Y = TEXT_TOP + TextBuffer::LINES_ON_SCREEN * LINE_H;  // top of the input line
-constexpr int CURSOR_W = 3;                        // the typing cursor's advance, in pixels
-constexpr int TEXT_MAX_W = 920 - 2 * MARGIN_X - CURSOR_W;  // widest finished line, in pixels
 constexpr int PANEL_Y = INPUT_Y + 40;                                      // top of the status panel
-
-// Width in pixels of a text line (style markers excluded), in the text font.
-int lineWidth(const std::string &s);
-// Make the editor wrap lines to fit the screen in the text font. Call before begin().
-void configure(Editor &ed);
 
 // Redraw the whole screen (clears the frame first). Also draws and clears the
 // editor's one-shot console message.

@@ -7,17 +7,6 @@ void TextBuffer::insert(char c) {
   cursor_++;
 }
 
-bool TextBuffer::tooLong(const std::string &s) const {
-  return width_ ? width_(s) > maxWidth_ : textfmt::visLen(s) > COLS;
-}
-
-size_t TextBuffer::fitIndex(const std::string &s) const {
-  if (!width_) return textfmt::rawIndex(s, COLS);
-  size_t n = 1, vis = textfmt::visLen(s);  // always take at least one character
-  while (n < vis && width_(s.substr(0, textfmt::rawIndex(s, n + 1))) <= maxWidth_) n++;
-  return textfmt::rawIndex(s, n);
-}
-
 void TextBuffer::pushInputAndRestart() {
   lines_.push_back(input_);
   input_ = textfmt::activeMarkers(textfmt::formatState(input_));  // open styles carry over
@@ -27,17 +16,17 @@ void TextBuffer::pushInputAndRestart() {
 bool TextBuffer::typeChar(char c) {
   if (c == ' ') {
     insert(c);
-    if (tooLong(input_)) {
+    if (textfmt::visLen(input_) > COLS) {
       pushInputAndRestart();
       return true;
     }
     return false;
   }
   insert(c);
-  if (tooLong(input_)) {
+  if (textfmt::visLen(input_) > COLS) {
     // Style markers take no width, so work in visible characters. Find the last
     // space before the limit; a long unbroken word is hard-broken at the limit.
-    size_t limit = fitIndex(input_);
+    size_t limit = textfmt::rawIndex(input_, COLS);
     size_t lastSpace = limit == 0 ? std::string::npos : input_.rfind(' ', limit - 1);
     std::string sentence;
     std::string rest;
@@ -60,7 +49,7 @@ bool TextBuffer::typeTab() {
   insert(' ');
   insert(' ');
   bool pushed = false;
-  if (tooLong(input_)) {
+  if (textfmt::visLen(input_) > COLS) {
     pushInputAndRestart();
     pushed = true;
   }

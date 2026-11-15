@@ -1,15 +1,10 @@
 // Reads typing ops on stdin, prints the buffer state; compared with text_buffer_ref.py.
 #include "text_buffer.h"
-#include "textfmt.h"
 #include <stdio.h>
 #include <string.h>
 static void hexp(const std::string &s) { for (unsigned char c : s) printf("%02x", c); }
-// "w" as argv[1]: wrap by pixel width with every character 7 px wide, which must
-// behave exactly like the COLS-based wrap.
-int main(int argc, char **argv) {
+int main() {
   TextBuffer b;
-  if (argc > 1 && argv[1][0] == 'w')
-    b.setLineWidth([](const std::string &s) { return 7 * (int)textfmt::visLen(s); }, 7 * (int)TextBuffer::COLS);
   char buf[256];
   while (fgets(buf, sizeof buf, stdin)) {
     char o = buf[0]; bool r = false;

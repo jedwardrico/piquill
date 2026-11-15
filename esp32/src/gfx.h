@@ -1,5 +1,5 @@
 // Drawing into a 1 bpp frame (row 0 at the top, MSB first, 1 = white) -- the
-// same layout EPD5in76::frame() uses. Proportional bitmap-font text with bold
+// same layout EPD5in76::frame() uses. Bitmap-font text with the Pi's bold
 // (double-strike), italic (shear) and underline styles.
 #pragma once
 
@@ -21,10 +21,9 @@ void setPixel(uint8_t *frame, int x, int y, bool black);
 void fillRect(uint8_t *frame, int x0, int y0, int x1, int y1, bool black);  // x1,y1 inclusive
 void hline(uint8_t *frame, int x0, int x1, int y, int thickness = 1);
 
-// Width in pixels of the visible characters of `s` (style markers take none).
-int textWidth(const Font &f, const std::string &s);
+inline int textWidth(const Font &f, size_t nchars) { return (int)(nchars * f.w); }
 
-// One run of text in one style, top-left at (x, y). Returns its advance width.
+// One run of text in one style, top-left at (x, y). Returns its width.
 int drawRun(uint8_t *frame, const Font &f, int x, int y, const char *s, size_t n, bool bold = false,
             bool italic = false, bool underline = false);
 // Plain text.

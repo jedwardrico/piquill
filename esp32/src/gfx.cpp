@@ -23,25 +23,14 @@ void hline(uint8_t *frame, int x0, int x1, int y, int thickness) {
   fillRect(frame, x0, y, x1, y + thickness - 1, true);
 }
 
-int textWidth(const Font &f, const std::string &s) {
-  int w = 0;
-  for (char c : s)
-    if (!textfmt::isMarker(c)) w += f.advance(c);
-  return w;
-}
-
-// Ink of one glyph at pen position x, optionally sheared (italic) and/or doubled
-// one pixel to the right (bold). The shear leans the top of each glyph right,
-// about the baseline.
+// Ink of one glyph, optionally sheared (italic) and/or doubled one pixel to the
+// right (bold). The shear leans the top of each glyph right, about the baseline.
 static void drawGlyph(uint8_t *frame, const Font &f, int x, int y, char c, bool bold, bool italic) {
-  const GlyphInfo &gi = f.glyph(c);
-  if (gi.w == 0) return;
-  const uint8_t *g = f.bits + gi.offset;
-  int rowBytes = (gi.w + 7) >> 3;
+  const uint8_t *g = f.glyph(c);
   for (int row = 0; row < f.h; row++) {
-    int dx = gi.xoff + (italic ? (int)lroundf(ITALIC_SLANT * (f.ascent - row)) : 0);
-    for (int col = 0; col < gi.w; col++) {
-      if (!(g[row * rowBytes + (col >> 3)] & (0x80 >> (col & 7)))) continue;
+    int dx = italic ? (int)lroundf(ITALIC_SLANT * (f.ascent - row)) : 0;
+    for (int col = 0; col < f.w; col++) {
+      if (!(g[row * f.rowBytes + (col >> 3)] & (0x80 >> (col & 7)))) continue;
       setPixel(frame, x + col + dx, y + row, true);
       if (bold) setPixel(frame, x + col + dx + 1, y + row, true);
     }
@@ -50,14 +39,12 @@ static void drawGlyph(uint8_t *frame, const Font &f, int x, int y, char c, bool 
 
 int drawRun(uint8_t *frame, const Font &f, int x, int y, const char *s, size_t n, bool bold, bool italic,
             bool underline) {
+  int width = textWidth(f, n);
   if (n == 0) return 0;
-  int pen = x;
-  for (size_t i = 0; i < n && pen < SCREEN_W; i++) {
-    drawGlyph(frame, f, pen, y, s[i], bold, italic);
-    pen += f.advance(s[i]);
-  }
-  if (underline) hline(frame, x, pen, y + f.ascent + 3);
-  return pen - x;
+  for (size_t i = 0; i < n && x + (int)(i * f.w) < SCREEN_W; i++)
+    drawGlyph(frame, f, x + (int)(i * f.w), y, s[i], bold, italic);
+  if (underline) hline(frame, x, x + width, y + f.ascent + 3);
+  return width;
 }
 
 int drawFormatted(uint8_t *frame, const Font &f, int x, int y, const std::string &s, textfmt::State &st) {
@@ -78,11 +65,11 @@ int drawFormatted(uint8_t *frame, const Font &f, int x, int y, const std::string
 }
 
 void drawCentered(uint8_t *frame, const Font &f, float cx, int y, const std::string &s) {
-  drawText(frame, f, (int)lroundf(cx - textWidth(f, s) / 2.0f), y, s);
+  drawText(frame, f, (int)lroundf(cx - textWidth(f, s.size()) / 2.0f), y, s);
 }
 
 void drawRightAligned(uint8_t *frame, const Font &f, int xRight, int y, const std::string &s) {
-  drawText(frame, f, xRight - textWidth(f, s), y, s);
+  drawText(frame, f, xRight - textWidth(f, s.size()), y, s);
 }
 
 }  // namespace gfx

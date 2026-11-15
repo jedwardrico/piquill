@@ -8,14 +8,11 @@
 namespace ui {
 using namespace gfx;
 
-static const Font &F_TEXT = FONT_32;    // text, input line, browser names
-static const Font &F_STATUS = FONT_22;
-static const Font &F_SMALL = FONT_20;
-static const Font &F_BIG = FONT_36;
-static const Font &F_NAME = FONT_30;
-
-int lineWidth(const std::string &s) { return textWidth(F_TEXT, s); }
-void configure(Editor &ed) { ed.setLineWidth(lineWidth, TEXT_MAX_W); }
+static const Font &F_TEXT = FONT_28;    // text, input line, browser names
+static const Font &F_STATUS = FONT_20;
+static const Font &F_SMALL = FONT_18;
+static const Font &F_BIG = FONT_32;
+static const Font &F_NAME = FONT_26;
 
 static std::string thousands(size_t n) {
   std::string s = std::to_string(n), out;
@@ -107,9 +104,8 @@ static void drawInputLine(uint8_t *f, const Editor &ed) {
   if (cur > text.size()) cur = text.size();
   textfmt::State st;
   int x = drawFormatted(f, F_TEXT, MARGIN_X, INPUT_Y, text.substr(0, cur), st);
-  // a thin bar between the characters; it takes CURSOR_W pixels so the text after it moves aside
-  fillRect(f, x, INPUT_Y, x + 1, INPUT_Y + F_TEXT.h - 1, true);
-  x += CURSOR_W;
+  drawRun(f, F_TEXT, x, INPUT_Y, "|", 1);
+  x += F_TEXT.w;
   drawFormatted(f, F_TEXT, x, INPUT_Y, text.substr(cur), st);
 }
 
@@ -127,7 +123,7 @@ void renderDisplay(uint8_t *f, Editor &ed, const BatteryInfo &bat) {
     int y = INPUT_Y - LINE_H;
     for (auto it = vis.rbegin(); it != vis.rend(); ++it, y -= LINE_H) {
       textfmt::State st;
-      drawFormatted(f, F_TEXT, MARGIN_X, y, *it, st);
+      drawFormatted(f, F_TEXT, MARGIN_X, y, it->substr(0, textfmt::rawIndex(*it, TextBuffer::COLS)), st);
     }
   }
   if (showsInputLine(ed)) drawInputLine(f, ed);
@@ -137,7 +133,7 @@ void renderDisplay(uint8_t *f, Editor &ed, const BatteryInfo &bat) {
   if (!msg.empty()) {
     // right-aligned on the input line's row; clear only its own box so the
     // status panel below is left alone
-    int w = textWidth(F_TEXT, msg);
+    int w = textWidth(F_TEXT, msg.size());
     fillRect(f, SCREEN_W - 10 - w, INPUT_Y, SCREEN_W - 1, INPUT_Y + F_TEXT.h - 1, false);
     drawText(f, F_TEXT, SCREEN_W - 10 - w, INPUT_Y, msg);
   }
@@ -152,7 +148,7 @@ void renderInput(uint8_t *f, Editor &ed, const BatteryInfo &bat) {
 void renderMessage(uint8_t *f, const char *msg) {
   clear(f);
   std::string m = msg;
-  drawText(f, F_TEXT, (SCREEN_W - textWidth(F_TEXT, m)) / 2, SCREEN_H / 2, m);
+  drawText(f, F_TEXT, (SCREEN_W - textWidth(F_TEXT, m.size())) / 2, SCREEN_H / 2, m);
 }
 
 }  // namespace ui

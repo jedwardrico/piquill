@@ -43,6 +43,10 @@ class Editor {
 
   Editor(DocStore &docs, std::function<uint32_t()> nowMs) : docs_(docs), nowMs_(nowMs) {}
 
+  // Wrap lines by pixel width (proportional font); see TextBuffer::setLineWidth.
+  void setLineWidth(std::function<int(const std::string &)> width, int maxWidth) {
+    text_.setLineWidth(std::move(width), maxWidth);
+  }
   void begin();                      // restore the working copy and current document
   Redraw onKey(const KeyEvent &e);
   Redraw tick();                     // call regularly: clears the "[Saved]" message after a second

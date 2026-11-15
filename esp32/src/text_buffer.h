@@ -2,7 +2,9 @@
 //
 // C++ port of the typing logic in src/main.py, including bold/italic/underline
 // markers (see textfmt.h). Behaviour matches the Pi version:
-//  - a line that grows past COLS visible characters is word-wrapped at the last
+//  - a line that grows too long (past COLS visible characters, or, once a width
+//    function is set with setLineWidth(), past the given pixel width) is
+//    word-wrapped at the last
 //    space, or hard-broken if the word has no space; styles still open at the
 //    break are re-opened on the next line;
 //  - a space/tab that overflows pushes the whole line and starts a new one;
@@ -12,13 +14,22 @@
 #pragma once
 
 #include <stddef.h>
+#include <functional>
 #include <string>
 #include <vector>
 
 class TextBuffer {
  public:
-  static constexpr size_t COLS = 52;          // visible characters per line
+  static constexpr size_t COLS = 52;          // visible characters per line (monospace default)
   static constexpr int LINES_ON_SCREEN = 14;  // finished lines shown above the input
+
+  // Proportional text: wrap by pixel width instead of by character count. `width`
+  // measures a string that may contain style markers; a line fits while its
+  // width is <= maxWidth. Without this, lines are COLS characters wide.
+  void setLineWidth(std::function<int(const std::string &)> width, int maxWidth) {
+    width_ = std::move(width);
+    maxWidth_ = maxWidth;
+  }
 
   // Return true if the finished lines changed (a line was pushed), which means
   // the whole text area needs a redraw, not just the input line.
@@ -47,8 +58,12 @@ class TextBuffer {
 
  private:
   void insert(char c);
+  bool tooLong(const std::string &s) const;
+  size_t fitIndex(const std::string &s) const;  // raw index after the longest prefix that fits
   void pushInputAndRestart();  // push whole input line, start a new one
   std::vector<std::string> lines_;
   std::string input_;
   size_t cursor_ = 0;
+  std::function<int(const std::string &)> width_;
+  int maxWidth_ = 0;
 };

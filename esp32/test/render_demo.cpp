@@ -22,6 +22,7 @@ int main(int, char **argv) {
   HostStorage fs(prefix + "_fs");
   DocStore docs(fs);
   Editor ed(docs, [] { return nowMs; });
+  ui::configure(ed);
   ed.begin();
   static uint8_t frame[gfx::ROW_BYTES * gfx::SCREEN_H];
   BatteryInfo bat{true, 87, false};

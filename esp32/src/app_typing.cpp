@@ -162,6 +162,7 @@ void setup() {
   epd.init();
   battery.begin();
   docs.setClock([] { return time(nullptr); });
+  ui::configure(editor);
   editor.begin();
   Serial.printf("Restored %d lines, document '%s', battery %s %d%%\n", (int)editor.text().lines().size(),
                 editor.docName().c_str(), battery.present() ? "ok" : "not found", battery.percent());

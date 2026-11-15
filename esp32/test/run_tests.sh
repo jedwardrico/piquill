@@ -8,8 +8,10 @@ python3 -I gen_ops.py "$T/ops.txt"
 g++ -std=c++17 -Wall -I../src text_buffer_test.cpp ../src/text_buffer.cpp ../src/textfmt.cpp -o "$T/tb"
 "$T/tb" < "$T/ops.txt" > "$T/cpp.txt"
 python3 -I text_buffer_ref.py < "$T/ops.txt" > "$T/py.txt"
+"$T/tb" w < "$T/ops.txt" > "$T/cpp_w.txt"
+if ! cmp -s "$T/cpp_w.txt" "$T/py.txt"; then echo "text buffer (pixel-width wrap): MISMATCH"; diff "$T/cpp_w.txt" "$T/py.txt" | head; exit 1; fi
 if cmp -s "$T/cpp.txt" "$T/py.txt"; then
-  echo "text buffer: OK ($(wc -l < "$T/ops.txt") keystrokes, $(grep -c '^\[' "$T/py.txt") lines)"
+  echo "text buffer: OK, also with pixel-width wrap ($(wc -l < "$T/ops.txt") keystrokes, $(grep -c '^\[' "$T/py.txt") lines)"
 else
   echo "text buffer: MISMATCH"; diff "$T/cpp.txt" "$T/py.txt" | head; exit 1
 fi
